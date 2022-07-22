@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:face_rec/login_page.dart';
 import 'package:face_rec/signup_page.dart';
+import 'package:face_rec/home_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         LoginPage.tag: (context) => const LoginPage(),
         SignUpPage.tag: (context) => const SignUpPage(),
+        HomePage.tag: (context) => const HomePage(),
       },
     );
   }

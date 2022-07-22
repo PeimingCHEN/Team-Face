@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'signup_page.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -43,7 +44,9 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 SizedBox(height: 30),
                 ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).pushNamed(HomePage.tag); //点击跳转主界面
+                    },
                     autofocus: true,
                     style: ButtonStyle(
                         backgroundColor:MaterialStateProperty.all(Colors.indigo),
