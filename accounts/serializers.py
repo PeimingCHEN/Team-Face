@@ -1,25 +1,40 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Organization, User, UserFaceImage, InvitationCode
+from .models import Organization, User, UserFaceImage
+
+
+class OrganizationListSerializer(ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = '__all__'
+
+
+class MemberSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['name', 'email', 'phone', 'register_time']
 
 
 class OrganizationSerializer(ModelSerializer):
+    members = MemberSerializer(many=True, read_only=True)
     class Meta:
         model = Organization
-        field = '__all__'
+        fields = '__all__'
 
-class UserSerializer(ModelSerializer):
+
+class UserListSerializer(ModelSerializer):
     class Meta:
         model = User
-        field = '__all__'
+        fields = '__all__'
+
 
 class UserFaceImageSerializer(ModelSerializer):
     class Meta:
         model = UserFaceImage
-        field = '__all__'
+        fields = '__all__'
 
-class InvitationCodeSerializer(ModelSerializer):
+
+class UserSerializer(ModelSerializer):
+    images = UserFaceImageSerializer(many=True, read_only=True)
     class Meta:
-        model = InvitationCode
-        field = '__all__'
-
-
+        model = User
+        fields = '__all__'

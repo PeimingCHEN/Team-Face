@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from accounts.models import User, Organization, InvitationCode
+from accounts.models import User, Organization
 
 
 def home_view(request):
