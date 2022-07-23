@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'facerec_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -46,7 +48,16 @@ class _HomePageState extends State<HomePage> {
               ),
             SizedBox(height: 15),
             ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    await availableCameras().then(
+                      (value) => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FaceRecPage(camera: value[1],),
+                        )
+                      )
+                    ); //点击跳转人脸识别界面
+                  },
                   autofocus: true,
                   style: ButtonStyle(
                       //设置按钮的颜色
