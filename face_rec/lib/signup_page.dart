@@ -34,6 +34,12 @@ class _SignUpPageState extends State<SignUpPage> {
               SizedBox(height: 10),
               TextFormField(
                 decoration: InputDecoration(
+                  hintText: "请输入公司码",
+                ),
+              ),
+              SizedBox(height: 15),
+              TextFormField(
+                decoration: InputDecoration(
                   hintText: "请输入手机号码",
                 ),
               ),
