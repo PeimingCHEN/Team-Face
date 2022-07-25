@@ -42,6 +42,7 @@ class _LoginPageState extends State<LoginPage> {
                       SizedBox(height: 10),
                       TextFormField(
                         controller: phoneController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           hintText: "请输入手机号码",
                         ),
@@ -95,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       setState(() {
         _isLoading = false;
-        Fluttertoast.showToast(msg: 'Failed!');
+        Fluttertoast.showToast(msg: '登录失败!');
       });
     }
   }

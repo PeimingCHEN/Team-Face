@@ -44,7 +44,7 @@ class _FaceRecPageState extends State<FaceRecPage> {
         backgroundColor: Colors.indigo,
         centerTitle: true,
         title: Text(
-          "Face Rec",
+          "Team Face",
           style: TextStyle(
             fontStyle: FontStyle.italic,
             fontWeight: FontWeight.bold,
