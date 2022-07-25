@@ -4,6 +4,10 @@
 # ignore the testing database
 db.sqlite3
 
+#ignore image data
+fr_algorithms/data/
+fr_algorithms/checkpoints/
+
 # ignore files in __pycache__ folder
 **/__pycache__/*
 
