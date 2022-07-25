@@ -16,7 +16,7 @@ from accounts.models import (
 )
 
 
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 class organization_list_apiview(APIView):
     def get(self, request, format=None):
         organizations = Organization.objects.all()
@@ -33,7 +33,7 @@ class organization_list_apiview(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 class organization_apiview(APIView):
     def get_object(self, name):
         try:
@@ -62,7 +62,7 @@ class organization_apiview(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@permission_classes([IsAuthenticated])
+
 class user_list_apiview(APIView):
     def get(self, request, format=None):
         users = User.objects.all()
@@ -79,7 +79,7 @@ class user_list_apiview(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 class user_apiview(APIView):
     def get_object(self, phone):
         try:
@@ -91,6 +91,15 @@ class user_apiview(APIView):
         user = self.get_object(phone)
         serializer = UserSerializer(user)
         return Response(serializer.data)
+
+    def post(self, request, phone, format=None):
+        user = self.get_object(phone)
+        serializer = UserSerializer(user)
+        password = request.data.get('password')
+        if user.password == password:
+            return Response(serializer.data)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, phone, format=None):
         user = self.get_object(phone)

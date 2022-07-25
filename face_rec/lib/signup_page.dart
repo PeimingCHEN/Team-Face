@@ -17,14 +17,14 @@ class _SignUpPageState extends State<SignUpPage> {
         title: Text("用户注册"),
       ),
       body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 80),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         child: Form(
           child: ListView(
             children: [
               const Text(
-                  "Face Rec",
+                  "Team Face",
                   style: TextStyle(
                     fontSize: 40,
                     fontStyle: FontStyle.italic,
@@ -40,6 +40,18 @@ class _SignUpPageState extends State<SignUpPage> {
               SizedBox(height: 15),
               TextFormField(
                 decoration: InputDecoration(
+                  hintText: "请输入姓名",
+                ),
+              ),
+              SizedBox(height: 15),
+              TextFormField(
+                decoration: InputDecoration(
+                  hintText: "请输入邮箱",
+                ),
+              ),
+              SizedBox(height: 15),
+              TextFormField(
+                decoration: InputDecoration(
                   hintText: "请输入手机号码",
                 ),
               ),
@@ -47,6 +59,12 @@ class _SignUpPageState extends State<SignUpPage> {
               TextFormField(
                 decoration: InputDecoration(
                   hintText: "请输入登录密码",
+                ),
+              ),
+              SizedBox(height: 15),
+              TextFormField(
+                decoration: InputDecoration(
+                  hintText: "请再次输入登录密码",
                 ),
               ),
               SizedBox(height: 30),
