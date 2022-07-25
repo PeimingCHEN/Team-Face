@@ -3,5 +3,5 @@ from .views import get_routes
 
 app_name = 'accounts'
 urlpatterns = [
-    path('api/', get_routes, name='api')
+    path('api/', get_routes, name='api'),
 ]
