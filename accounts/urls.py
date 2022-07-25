@@ -1,7 +1,17 @@
-from django.urls import path, include
-from .views import get_routes
+from django.urls import path
+from rest_framework.urlpatterns import format_suffix_patterns
+from accounts.views import (
+    organization_apiview,
+    organization_list_apiview,
+    user_list_apiview,
+    user_apiview
+)
 
 app_name = 'accounts'
 urlpatterns = [
     path('api/', get_routes, name='api'),
+    path('organization', organization_list_apiview.as_view()),
+    path('organization/<str:name>', organization_apiview.as_view()),
+    path('user', user_list_apiview.as_view()),
+    path('user/<str:phone>', user_apiview.as_view()),
 ]
