@@ -9,7 +9,6 @@ from accounts.views import (
 
 app_name = 'accounts'
 urlpatterns = [
-    path('api/', get_routes, name='api'),
     path('organization', organization_list_apiview.as_view()),
     path('organization/<str:name>', organization_apiview.as_view()),
     path('user', user_list_apiview.as_view()),
