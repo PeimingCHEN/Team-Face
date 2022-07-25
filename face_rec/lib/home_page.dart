@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
         automaticallyImplyLeading: false, //关闭左侧退出箭头
         centerTitle: true,
         title: Text(
-          "Face Rec",
+          "Team Face",
           style: TextStyle(
             fontStyle: FontStyle.italic,
             fontWeight: FontWeight.bold,
