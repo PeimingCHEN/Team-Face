@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.face_rec">
    <application
-        android:label="face_rec"
+        android:label="Team Face"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
