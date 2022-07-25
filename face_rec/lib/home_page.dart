@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'facerec_page.dart';
+import 'setup_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
@@ -49,47 +50,63 @@ class _HomePageState extends State<HomePage> {
         width: MediaQuery.of(context).size.width,
         child: ListView(
           children: [
-            ElevatedButton(
-                onPressed: () {},
-                autofocus: true,
-                style: ButtonStyle(
-                  //设置按钮的颜色
-                  backgroundColor: MaterialStateProperty.all(Colors.indigo),
-                  //设置按钮的大小
-                  minimumSize: MaterialStateProperty.all(Size(200, 50)),
-                ),
-                child: const Text(
-                  "设置",
-                  style: TextStyle(fontSize: 20),
-                )),
+            setupBTN(),
             SizedBox(height: 15),
-            ElevatedButton(
-                onPressed: () async {
-                  await availableCameras().then((value) => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FaceRecPage(
-                          camera: value[1],
-                        ),
-                      ))); //点击跳转人脸识别界面
-                },
-                autofocus: true,
-                style: ButtonStyle(
-                  //设置按钮的颜色
-                  backgroundColor: MaterialStateProperty.all(Colors.indigo),
-                  //设置按钮的大小
-                  minimumSize: MaterialStateProperty.all(Size(200, 50)),
-                ),
-                child: const Text(
-                  "人脸识别",
-                  style: TextStyle(fontSize: 20),
-                )),
+            facerecBTN(),
             SizedBox(height: 15),
             signoutBTN()
           ],
         ),
       ),
     );
+  }
+
+  ElevatedButton setupBTN() {
+    return ElevatedButton(
+        onPressed: () async {
+          await availableCameras().then((value) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SetUpPage(
+                  camera: value[1],
+                ),
+              ))); //点击跳转人脸识别界面
+        },
+        autofocus: true,
+        style: ButtonStyle(
+          //设置按钮的颜色
+          backgroundColor: MaterialStateProperty.all(Colors.indigo),
+          //设置按钮的大小
+          minimumSize: MaterialStateProperty.all(Size(200, 50)),
+        ),
+        child: const Text(
+          "设置",
+          style: TextStyle(fontSize: 20),
+        ));
+  }
+
+  ElevatedButton facerecBTN() {
+    return ElevatedButton(
+        onPressed: () async {
+          await availableCameras().then((value) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FaceRecPage(
+                  camera: value[1],
+                ),
+              ))); //点击跳转人脸识别界面
+        },
+        autofocus: true,
+        style: ButtonStyle(
+          //设置按钮的颜色
+          backgroundColor: MaterialStateProperty.all(Colors.indigo),
+          //设置按钮的大小
+          minimumSize: MaterialStateProperty.all(Size(200, 50)),
+        ),
+        child: const Text(
+          "人脸识别",
+          style: TextStyle(fontSize: 20),
+        ));
   }
 
   ElevatedButton signoutBTN() {
