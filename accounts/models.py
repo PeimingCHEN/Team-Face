@@ -74,5 +74,7 @@ class UserFaceImage(models.Model):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              related_name='images')
-    image = models.ImageField(
-        upload_to='user/', storage=image_storage, verbose_name='头像照片')
+    # image = models.ImageField(
+    #     upload_to='user/', storage=image_storage, verbose_name='头像照片')
+    image = models.CharField(
+        max_length=1024, verbose_name='头像照片')
