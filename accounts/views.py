@@ -117,6 +117,7 @@ class user_apiview(APIView):
 
     def put(self, request, phone, format=None):
         user = self.get_object(phone)
+        print(request.data)
         serializer = UserSerializer(user,
                                     data=request.data)
         if serializer.is_valid():
