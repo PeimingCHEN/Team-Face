@@ -21,6 +21,7 @@ class _FaceRecPageState extends State<FaceRecPage> {
     controller = CameraController(
       widget.camera,
       ResolutionPreset.max,
+      enableAudio: false
     );
     controller.initialize().then((_) {
       if (!mounted) {
@@ -44,7 +45,7 @@ class _FaceRecPageState extends State<FaceRecPage> {
         backgroundColor: Colors.indigo,
         centerTitle: true,
         title: Text(
-          "Face Rec",
+          "Team Face",
           style: TextStyle(
             fontStyle: FontStyle.italic,
             fontWeight: FontWeight.bold,
@@ -64,8 +65,8 @@ class _FaceRecPageState extends State<FaceRecPage> {
               padding: const EdgeInsets.all(8.0),
               child: Center(
                 child: SizedBox(
-                  height: 400,
-                  width: 400,
+                  height: 500,
+                  width: 500,
                   child: CameraPreview(controller),
                 ),
               ),

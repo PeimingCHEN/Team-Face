@@ -36,6 +36,9 @@ dependencies:
   cupertino_icons: ^1.0.2
   # A Flutter plugin for iOS, Android and Web allowing access to the device cameras.
   camera: ^0.10.0
+  http: any
+  shared_preferences: any
+  fluttertoast: ^8.0.9
 
 dev_dependencies:
   flutter_test:
