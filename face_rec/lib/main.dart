@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:face_rec/login_page.dart';
 import 'package:face_rec/signup_page.dart';
 import 'package:face_rec/home_page.dart';
+import 'package:face_rec/setup_page.dart';
 
 void main() {
   // Ensure that plugin services are initialized so that `availableCameras()`
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         LoginPage.tag: (context) => const LoginPage(),
         SignUpPage.tag: (context) => const SignUpPage(),
         HomePage.tag: (context) => const HomePage(),
+        SetUpPage.tag: (context) => const SetUpPage(),
       },
     );
   }
