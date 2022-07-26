@@ -84,7 +84,8 @@ class _LoginPageState extends State<LoginPage> {
     Map data = {'password': password};
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var response = await http.post(
-        Uri.parse("http://10.0.2.2:8000/accounts/user/$phone"),
+        // Uri.parse("http://10.0.2.2:8000/accounts/user/$phone"),
+        Uri.parse("http://127.0.0.1:8000/accounts/user/$phone"),
         body: data);
     if (response.statusCode == 200) {
       var jsonResponse = json.decode(response.body);
