@@ -10,7 +10,7 @@ import 'package:face_rec/setup_page.dart';
 void main() {
   // Ensure that plugin services are initialized so that `availableCameras()`
   // can be called before `runApp()`
-  WidgetsFlutterBinding.ensureInitialized();
+  // WidgetsFlutterBinding.ensureInitialized();
   // Obtain a list of the available cameras on the device.
   // final cameras = await availableCameras();
   //get the front camera and do what you want

@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:http/http.dart' as http;
 import 'dart:io';
 
 class SetUpPage extends StatefulWidget {
@@ -25,7 +26,7 @@ class _SetUpPageState extends State<SetUpPage> {
   loadCamera() async {
     cameras = await availableCameras();
     if (cameras != null) {
-      controller = CameraController(cameras![1], ResolutionPreset.max);
+      controller = CameraController(cameras![1], ResolutionPreset.medium);
       //cameras[0] = first camera, change to 1 to another camera
 
       controller!.initialize().then((_) {
@@ -64,8 +65,8 @@ class _SetUpPageState extends State<SetUpPage> {
           child: Column(children: [
         Container(
           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          height: 400,
-          width: 400,
+          height: 300,
+          width: 300,
           child: controller == null
               ? Center(child: Text("Loading Camera..."))
               : !controller!.value.isInitialized
@@ -85,33 +86,13 @@ class _SetUpPageState extends State<SetUpPage> {
               ? Text("No image captured")
               : Image.file(
                   File(image!.path),
-                  height: 400,
+                  height: 100,
                 ),
           //display captured image
         )
       ])),
     );
   }
-  //     body: Container(
-  //       // padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-  //       // height: MediaQuery.of(context).size.height,
-  //       // width: MediaQuery.of(context).size.width,
-  //       child: ListView(children: [
-  //         if (controller == null) ...[
-  //           CircularProgressIndicator(),
-  //         ] else ...[
-  //           RotationTransition(
-  //             turns: AlwaysStoppedAnimation(90/360),
-  //             child: CameraPreview(controller!),
-  //             ),
-  //           takepic(),
-  //           if (image != null)
-  //             Image.file(File(image!.path))
-  //         ]
-  //       ]),
-  //     ),
-  //   );
-  // }
 
   FloatingActionButton takepic() {
     return FloatingActionButton(
@@ -121,14 +102,16 @@ class _SetUpPageState extends State<SetUpPage> {
             //check if contrller is not null
             if (controller!.value.isInitialized) {
               //check if controller is initialized
-              print('fuckkkkkk');
               image = await controller!.takePicture(); //capture image
-              print('success');
+              File file = File(image!.path);
+              var request = http.MultipartRequest('put', Uri.parse("http://10.0.2.2:8000/accounts/user/123"));
+              request.files.add(http.MultipartFile.fromBytes('images', File(file.path).readAsBytesSync(),filename: file.path));
+              var res = await request.send();
               setState(() {});
             }
           }
         } catch (e) {
-          print('iadusfghsudfgaiudfgboahidb'); //show error
+          print(e); //show error
         }
       },
       child: const Icon(Icons.camera_alt),
