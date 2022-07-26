@@ -9,10 +9,12 @@ from accounts.serializers import (
     OrganizationSerializer,
     UserListSerializer,
     UserSerializer,
+    UserFaceImageSerializer,
 )
 from accounts.models import (
     Organization,
     User,
+    UserFaceImage
 )
 
 
@@ -117,11 +119,12 @@ class user_apiview(APIView):
 
     def put(self, request, phone, format=None):
         user = self.get_object(phone)
-        print(request.data)
         serializer = UserSerializer(user,
                                     data=request.data)
+        print(request.data)
         if serializer.is_valid():
             serializer.save()
+            print(serializer.data)
             return Response(serializer.data)
         return Response(serializer.errors,
                         status=status.HTTP_400_BAD_REQUEST)
@@ -131,6 +134,38 @@ class user_apiview(APIView):
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+class image_apiview(APIView):
+    def get(self, request, format=None):
+        imgs = UserFaceImage.objects.all()
+        serializer = UserFaceImageSerializer(imgs, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        # 用户注册功能
+        # 获得填写的邀请码
+        name = request.data.get('user')
+        
+        try:
+            # 根据邀请码获取组织
+            user = User.objects.get(name=name)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        data=request.data.copy()
+        image = request.FILES['images']
+        test = user.images.create()
+        test.image.save(image.name, image)
+        data['user'] = user.phone
+        # print(data)
+        serializer = UserFaceImageSerializer(data=data)
+        # 注册用户
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,
+                                status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
 # class invitationcode_list_apiview(APIView):
 

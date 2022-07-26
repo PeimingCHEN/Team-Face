@@ -66,5 +66,3 @@ class UserFaceImage(models.Model):
                              related_name='images')
     image = models.ImageField(
         upload_to=user_directory_path, storage=image_storage, verbose_name='头像照片')
-
-    
