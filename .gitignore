@@ -7,8 +7,11 @@ db.sqlite3
 #ignore image data
 fr_algorithms/data/
 fr_algorithms/checkpoints/
+<<<<<<< HEAD
 media/
 fr_algorithms/siamesemodelv2.h5
+=======
+>>>>>>> d41137b09154e6681f71228b674ca9590cad9985
 
 # ignore files in __pycache__ folder
 **/__pycache__/*
