@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:io';
 import 'utils.dart';
-import 'dart:async';
 import 'package:image/image.dart' as imgpack;
 
 class SetUpPage extends StatefulWidget {
@@ -42,7 +42,7 @@ class _SetUpPageState extends State<SetUpPage> {
         setState(() {});
       });
     } else {
-      print("NO any camera found");
+      Fluttertoast.showToast(msg: '找不到相机');
     }
   }
 
@@ -127,7 +127,7 @@ class _SetUpPageState extends State<SetUpPage> {
         var request =
             http.MultipartRequest('put', Uri.parse("$reqUrl/$userPhone"));
         request.files.addAll(newList);
-        var res = await request.send();
+        await request.send();
         setState(() {});
       }
     }
@@ -136,11 +136,7 @@ class _SetUpPageState extends State<SetUpPage> {
   FloatingActionButton takepic() {
     return FloatingActionButton(
       onPressed: () async {
-        try {
-          autocam();
-        } catch (e) {
-          print(e); //show error
-        }
+        autocam();
       },
       child: const Icon(Icons.camera_alt),
     );

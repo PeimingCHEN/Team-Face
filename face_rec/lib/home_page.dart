@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'facerec_page.dart';
 import 'setup_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';

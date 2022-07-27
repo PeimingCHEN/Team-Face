@@ -63,12 +63,11 @@ class _FaceRecPageState extends State<FaceRecPage> {
           filename: file.path));
       int? userPhone = loginUserPreference!.getInt("phone");
       request.fields.addAll({'phone': '$userPhone'});
-      var response = await request.send();
-      if (response.statusCode == 200) {
-        var respStr = await http.Response.fromStream(response);
-        var jsonResponse = json.decode(respStr.body);
-        // var respStr = await response.stream.transform(utf8.decoder).join();
-        Fluttertoast.showToast(msg: jsonResponse['result']);
+      var streamedResponse = await request.send();
+      if (streamedResponse.statusCode == 200) {
+        var response = await streamedResponse.stream.bytesToString();
+        final result = json.decode(response);
+        showDialogFunction(result['result']);
       } else {
         setState(() {
           Fluttertoast.showToast(msg: '异常');
@@ -76,6 +75,27 @@ class _FaceRecPageState extends State<FaceRecPage> {
       }
       setState(() {});
     }
+  }
+
+  void showDialogFunction(String str) async {
+    await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("识别结果"),
+          titleTextStyle: TextStyle(
+              fontWeight: FontWeight.bold, color: Colors.black, fontSize: 20),
+          actions: [
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("确定")),
+          ],
+          content: Text(str),
+        );
+      },
+    );
   }
 
   fetchUser() async {

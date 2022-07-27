@@ -178,5 +178,7 @@ class test_img_apiview(APIView):
         if result != 'unrecognized identity!':
             detect_user = User.objects.get(phone=int(result))
             result = detect_user.organization.name
+        else:
+            result = '无法识别身份'
         result='{"result":"'+result+'"}'
         return Response(json.loads(result), status=status.HTTP_200_OK)
