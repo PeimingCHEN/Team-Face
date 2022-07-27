@@ -420,6 +420,10 @@ def recognize_organization(phone):
 
     print(user_phone)
     print(recog_prob)
+
+    #remove the test photo
+    for img in os.listdir(user_test_image_dir):
+        os.remove(os.path.join(user_test_image_dir,img))
     
     if recog_prob > 0.8:
         print('返回用户电话号码：{}'.format(user_phone))
