@@ -15,7 +15,9 @@ from accounts.serializers import (
 from accounts.models import (
     Organization,
     User,
-    UserTestImage
+    UserTestImage,
+    FaceImage_delete,
+    TestImage_delete
 )
 
 
@@ -117,7 +119,7 @@ class user_apiview(APIView):
             return Response(serializer.data)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
+    
     def put(self, request, phone, format=None):
         # 用户设置功能，包括上传anchor，及后续修改密码等操作
         user = self.get_object(phone)
@@ -125,7 +127,11 @@ class user_apiview(APIView):
                                     data=request.data)
         if serializer.is_valid():
             imagelist = dict((request.data).lists())['images']
-            user.images.all().delete()
+            old_images = user.images.all()
+            for image in old_images:
+                FaceImage_delete(instance=image)
+                image.delete()
+
             for image in imagelist:
                 user_img = user.images.create()
                 user_img.image.save(image.name, image)
@@ -156,7 +162,10 @@ class test_img_apiview(APIView):
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         test_image_req = request.FILES['test_images']
-        user.test.all().delete()
+        old_images = user.test.all()
+        for image in old_images:
+            TestImage_delete(instance=image)
+            image.delete()
         test_image = user.test.create()
         test_image.test_image.save(test_image_req.name, test_image_req)
         return Response(status=status.HTTP_200_OK)

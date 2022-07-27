@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.core.files.storage import FileSystemStorage
 from backend.settings import MEDIA_ROOT, MEDIA_URL
 
@@ -70,6 +72,10 @@ class UserFaceImage(models.Model):
     image = models.ImageField(
         upload_to=user_directory_path, storage=image_storage, verbose_name='头像照片')
 
+@receiver(pre_delete, sender=UserFaceImage) #sender=你要删除或修改文件字段所在的类**
+def FaceImage_delete(instance, **kwargs):       #函数名随意
+    instance.image.delete(False) #file是保存文件或图片的字段名**
+
 
 class UserTestImage(models.Model):
     class Meta:
@@ -82,3 +88,7 @@ class UserTestImage(models.Model):
                              related_name='test')
     test_image = models.ImageField(
         upload_to=test_directory_path, storage=image_storage, verbose_name='测试照片')
+
+@receiver(pre_delete, sender=UserTestImage) #sender=你要删除或修改文件字段所在的类**
+def TestImage_delete(instance, **kwargs):       #函数名随意
+    instance.test_image.delete(False) #file是保存文件或图片的字段名**
