@@ -356,6 +356,7 @@ def update_model_with_new_training_data(user_phone, learning_rate=0.00001):
     siamese_model = tf.keras.models.load_model(model_path, 
                     custom_objects={'L1Dist':L1Dist, 'BinaryCrossentropy':tf.losses.BinaryCrossentropy})
     time.sleep(1)
+    
 
     # train the model
     EPOCHS = 3
