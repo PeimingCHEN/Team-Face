@@ -4,13 +4,10 @@ import os
 import shutil
 from operator import itemgetter
 import time
-from turtle import up
 import uuid
 from pathlib import Path
-import random
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Layer, Conv2D, Dense, MaxPooling2D, Input, Flatten
 import tensorflow as tf
@@ -297,10 +294,14 @@ def train_initial_model(anchor_path, positive_path, negative_path, learning_rate
 def copy_face_images(user_phone):
 
     uploaded_photo_dir = os.path.join(BASE_DIR,'media/user',user_phone)
-    images = os.listdir(uploaded_photo_dir)
+    images = [img for img in os.listdir(uploaded_photo_dir) if img.endswith('jpg')]
     user_anchor_path = os.path.join(BASE_DIR,'media/user',user_phone,'anchor')
     if not os.path.exists(user_anchor_path):
         os.makedirs(user_anchor_path)
+    else:
+        existing_images = os.listdir(user_anchor_path)
+        for img in existing_images:
+            os.remove(os.path.join(user_anchor_path,img))
     for img in images:
         img_path = os.path.join(uploaded_photo_dir,img)
         new_path = os.path.join(user_anchor_path,img)
@@ -378,6 +379,13 @@ def update_model_with_new_training_data(user_phone, learning_rate=0.00001):
     print('save the newly trained network to {}'.format(save_path))
     siamese_model.save(save_path)
 
+    #remove all configuration images
+    images = (img for img in os.listdir(uploaded_photo_dir) if img.endswith('jpg'))
+    image_paths = (os.path.join(uploaded_photo_dir,img) for img in images)
+    for img_path in image_paths:
+        os.remove(img_path)
+
+
 
 #recognize one image   
 def recognize(test_img, anchor_img):
@@ -421,7 +429,7 @@ def recognize_organization(phone):
     for img in os.listdir(user_test_image_dir):
         os.remove(os.path.join(user_test_image_dir,img))
     
-    if recog_prob > 0.8:
+    if recog_prob > 0.6:
         print('返回用户电话号码：{}'.format(user_phone))
         return(user_phone)
         

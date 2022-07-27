@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image/image.dart' as imgpack;
 import 'dart:io';
+import 'dart:convert';
 import 'utils.dart';
 
 class FaceRecPage extends StatefulWidget {
@@ -62,7 +63,17 @@ class _FaceRecPageState extends State<FaceRecPage> {
           filename: file.path));
       int? userPhone = loginUserPreference!.getInt("phone");
       request.fields.addAll({'phone': '$userPhone'});
-      var res = await request.send();
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        var respStr = await http.Response.fromStream(response);
+        var jsonResponse = json.decode(respStr.body);
+        // var respStr = await response.stream.transform(utf8.decoder).join();
+        Fluttertoast.showToast(msg: jsonResponse['result']);
+      } else {
+        setState(() {
+          Fluttertoast.showToast(msg: '异常');
+        });
+      }
       setState(() {});
     }
   }
@@ -96,11 +107,6 @@ class _FaceRecPageState extends State<FaceRecPage> {
           padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
-          // child: Column(children: [
-          // SizedBox(
-          //   // padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          //   height: 500,
-          //   // width: 500,
           child: controller == null
               ? Center(child: Text("Loading Camera..."))
               : !controller!.value.isInitialized
@@ -109,27 +115,16 @@ class _FaceRecPageState extends State<FaceRecPage> {
                     )
                   : Stack(
                       alignment: Alignment.center,
-                      children: [
-                        CameraPreview(controller!),
-                        takepicBTN()
-                      ],
-                    )
-          // ),
-          // takepicBTN(),
-          // ])
-          ),
+                      children: [CameraPreview(controller!), takepicBTN()],
+                    )),
     );
   }
 
   FloatingActionButton takepicBTN() {
     return FloatingActionButton(
-      onPressed: () async {
-        try {
-          if (controller != null) {
-            autocam();
-          }
-        } catch (e) {
-          print(e); //show error
+      onPressed: () {
+        if (controller != null) {
+          autocam();
         }
       },
       child: const Icon(Icons.camera_alt),

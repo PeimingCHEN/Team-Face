@@ -5,6 +5,7 @@ from rest_framework import status
 from django.http import Http404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+import json;
 from accounts.serializers import (
     OrganizationListSerializer,
     OrganizationSerializer,
@@ -19,6 +20,7 @@ from accounts.models import (
     FaceImage_delete,
     TestImage_delete
 )
+import fr_algorithms.siamese as siamese
 
 
 # @permission_classes([IsAuthenticated])
@@ -136,7 +138,10 @@ class user_apiview(APIView):
                 user_img = user.images.create()
                 user_img.image.save(image.name, image)
             serializer.save()
-            return Response(serializer.data)
+            # train
+            siamese.copy_face_images(str(user.phone))
+            siamese.update_model_with_new_training_data(str(user.phone))
+            return Response(status=status.HTTP_200_OK)
         return Response(serializer.errors,
                         status=status.HTTP_400_BAD_REQUEST)
 
@@ -168,4 +173,10 @@ class test_img_apiview(APIView):
             image.delete()
         test_image = user.test.create()
         test_image.test_image.save(test_image_req.name, test_image_req)
-        return Response(status=status.HTTP_200_OK)
+        # test
+        result = siamese.recognize_organization(str(phone))
+        if result != 'unrecognized identity!':
+            detect_user = User.objects.get(phone=int(result))
+            result = detect_user.organization.name
+        result='{"result":"'+result+'"}'
+        return Response(json.loads(result), status=status.HTTP_200_OK)
