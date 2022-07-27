@@ -3,10 +3,11 @@
 import os
 import shutil
 from operator import itemgetter
+import time
 from turtle import up
 import uuid
 from pathlib import Path
-from backend.settings import BASE_DIR
+# from backend.settings import BASE_DIR
 import random
 import cv2
 import numpy as np
@@ -18,6 +19,8 @@ from tensorflow.keras.metrics import Precision, Recall
 
 
 cur_dir = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
+print(BASE_DIR)
 anchor_path = os.path.join(cur_dir,'data/anchor')
 positive_path = os.path.join(cur_dir,'data/positive')
 negative_path = os.path.join(cur_dir,'data/negative')
@@ -82,8 +85,9 @@ def augment_images(image_paths):
         
         for image in augmented_images:
             image_name = '{}.jpg'.format(uuid.uuid1())
-            print('...save augmented image {}'.format(image_name))
-            cv2.imwrite(os.path.join(img_path, image_name), image.numpy())
+            new_path = '/'.join(img_path.split('/')[:-1])
+            print('...save augmented image {}'.format(os.path.join(new_path,image_name)))
+            cv2.imwrite(os.path.join(new_path, image_name), image.numpy())
 
 
 
@@ -196,14 +200,16 @@ def train_step(batch, opt, loss_func, siamese_model):
 #training loops
 def train(data, EPOCHS, siamese_model, learning_rate=0.0001):
 
+    # setup loss and optimizer
+    print('setup loss and optimizer')
+    binary_cross_loss = tf.losses.BinaryCrossentropy()
+    opt = tf.keras.optimizers.Adam(learning_rate)  
+
     # establish checkpoints
+    print('create checkpoints...')
     checkpoint_dir = os.path.join(cur_dir,'checkpoints')
     checkpoint_prefix = os.path.join(checkpoint_dir,'ckpt')
     checkpoint = tf.train.Checkpoint(opt=opt, siamese_model=siamese_model) 
-
-    # setup loss and optimizer
-    binary_cross_loss = tf.losses.BinaryCrossentropy()
-    opt = tf.keras.optimizers.Adam(learning_rate)  
 
     # Loop through epochs
     for epoch in range(1, EPOCHS+1):
@@ -232,15 +238,17 @@ def train(data, EPOCHS, siamese_model, learning_rate=0.0001):
 def train_initial_model(anchor_path, positive_path, negative_path, learning_rate=0.0001):
 
     #create the training datasets
-    anchor = tf.data.Dataset.list_files(anchor_path+'/*.jpg').take(30)
-    positive = tf.data.Dataset.list_files(positive_path+'/*.jpg').take(30)
-    negative = tf.data.Dataset.list_files(negative_path+'/*.jpg').take(30)
+    print('create the training datasets...')
+    anchor = tf.data.Dataset.list_files(anchor_path+'/*.jpg').take(300)
+    positive = tf.data.Dataset.list_files(positive_path+'/*.jpg').take(300)
+    negative = tf.data.Dataset.list_files(negative_path+'/*.jpg').take(300)
 
     negatives = tf.data.Dataset.zip((anchor, negative, tf.data.Dataset.from_tensor_slices(tf.zeros(len(anchor)))))
     positives = tf.data.Dataset.zip((anchor, positive, tf.data.Dataset.from_tensor_slices(tf.ones(len(anchor)))))
     data = positives.concatenate(negatives)
 
     # build train and test partition
+    print('build the train and test data partitions...')
     data = data.map(image_preprocess_twin)
     data = data.cache()
     data = data.shuffle(buffer_size=10000)
@@ -258,11 +266,15 @@ def train_initial_model(anchor_path, positive_path, negative_path, learning_rate
 
     ## training
     # Siamese model
+    print('make the siamese model...')
     siamese_model = make_siamese_model()
 
     # train the model
+
+    print('training the model...')
+    time.sleep(5)
     EPOCHS = 50
-    train(train_data, EPOCHS, siamese_mmodel, learning_rate)
+    train(train_data, EPOCHS, siamese_model, learning_rate)
 
     #make predictions
     r = Recall()
@@ -273,10 +285,13 @@ def train_initial_model(anchor_path, positive_path, negative_path, learning_rate
         r.update_state(y_true, yhat)
         p.update_state(y_true,yhat) 
 
-    print(r.result().numpy(), p.result().numpy())
+    print('The testing recall {}...precision {}'.format(r.result().numpy(), p.result().numpy()))
+    time.sleep(10)
 
     # Save weights
-    siamese_model.save(os.path.join(cur_dir,'siamesemodelv2.h5'))
+    save_path = os.path.join(cur_dir,'siamesemodelv2.h5')
+    print('save the newly trained network to {}'.format(save_path))
+    siamese_model.save(save_path)
 
 
 # upon receiving the posted face images, 
@@ -401,13 +416,18 @@ if __name__ == '__main__':
 
     ## collect 
     #collect anchor images and positive images
-    collect_anchor_pos_images(anchor_path,positive_path)
+    # collect_anchor_pos_images(anchor_path,positive_path)
 
     #generate augmented images for training purpose
     # positive_image_paths = [os.path.join(positive_path,img) for img in os.listdir(positive_path) if not img.startswith('.')]
     # anchor_image_paths = [os.path.join(anchor_path,img) for img in os.listdir(anchor_path) if not img.startswith('.')]
     # augment_images(positive_image_paths)
     # augment_images(anchor_image_paths)
+    # print(len(positive_image_paths))
+    # print(len(anchor_image_paths))
+    # print(len(os.listdir(os.path.join(negative_path))))
+    train_initial_model(anchor_path, positive_path, negative_path, learning_rate=0.0001)
+
 
 
 
