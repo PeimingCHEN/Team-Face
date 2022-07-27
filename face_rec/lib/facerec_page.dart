@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image/image.dart' as imgpack;
 import 'dart:io';
 import 'utils.dart';
@@ -10,7 +11,6 @@ import 'utils.dart';
 class FaceRecPage extends StatefulWidget {
   const FaceRecPage({Key? key}) : super(key: key);
   static String tag = 'facerec-page';
-
   @override
   State<FaceRecPage> createState() => _FaceRecPageState();
 }
@@ -37,9 +37,33 @@ class _FaceRecPageState extends State<FaceRecPage> {
           return;
         }
         setState(() {});
+        // autocam();
       });
     } else {
-      print("NO any camera found");
+      Fluttertoast.showToast(msg: '找不到相机');
+    }
+  }
+
+  void autocam() async {
+    if (controller!.value.isInitialized) {
+      //check if controller is initialized
+      image = await controller!.takePicture(); //capture image
+      File file = File(image!.path);
+      // Read a jpeg image from file path
+      imgpack.Image? resizedImage = imgpack.decodeImage(file.readAsBytesSync());
+      // Resize the image
+      resizedImage = imgpack.copyResize(resizedImage!, width: 250, height: 250);
+      // Save the resize image
+      file = file
+        ..writeAsBytesSync(imgpack.encodeJpg(resizedImage, quality: 100));
+      var request = http.MultipartRequest('post', Uri.parse(API.testimgUrl));
+      request.files.add(http.MultipartFile.fromBytes(
+          'test_images', File(file.path).readAsBytesSync(),
+          filename: file.path));
+      int? userPhone = loginUserPreference!.getInt("phone");
+      request.fields.addAll({'phone': '$userPhone'});
+      var res = await request.send();
+      setState(() {});
     }
   }
 
@@ -50,7 +74,7 @@ class _FaceRecPageState extends State<FaceRecPage> {
   @override
   void dispose() {
     // Dispose of the controller when the widget is disposed.
-    controller!.dispose();
+    controller?.dispose();
     super.dispose();
   }
 
@@ -69,24 +93,31 @@ class _FaceRecPageState extends State<FaceRecPage> {
         ),
       ),
       body: Container(
-          child: Column(children: [
-        Container(
-          // padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          height: 530,
-          width: 400,
+          padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          // child: Column(children: [
+          // SizedBox(
+          //   // padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          //   height: 500,
+          //   // width: 500,
           child: controller == null
               ? Center(child: Text("Loading Camera..."))
               : !controller!.value.isInitialized
                   ? Center(
                       child: CircularProgressIndicator(),
                     )
-                  : RotationTransition(
-                      turns: AlwaysStoppedAnimation(90 / 360),
-                      child: CameraPreview(controller!),
-                    ),
-        ),
-        takepicBTN(),
-      ])),
+                  : Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CameraPreview(controller!),
+                        takepicBTN()
+                      ],
+                    )
+          // ),
+          // takepicBTN(),
+          // ])
+          ),
     );
   }
 
@@ -95,28 +126,7 @@ class _FaceRecPageState extends State<FaceRecPage> {
       onPressed: () async {
         try {
           if (controller != null) {
-            //check if contrller is not null
-            if (controller!.value.isInitialized) {
-              //check if controller is initialized
-              image = await controller!.takePicture(); //capture image
-              File file = File(image!.path);
-              // Read a jpeg image from file path
-              imgpack.Image? resizedImage = imgpack.decodeImage(file.readAsBytesSync());
-              // Resize the image
-              resizedImage = imgpack.copyResize(resizedImage!, width: 400, height: 400);
-              // Save the resize image
-              file = file
-                  ..writeAsBytesSync(imgpack.encodeJpg(resizedImage, quality: 100));
-              int? userPhone = loginUserPreference!.getInt("phone");
-              var request =
-                  http.MultipartRequest('post', Uri.parse(API.testimgUrl));
-              request.fields.addAll({'phone': '$userPhone'});
-              request.files.add(http.MultipartFile.fromBytes(
-                  'test_images', File(file.path).readAsBytesSync(),
-                  filename: file.path));
-              var res = await request.send();
-              setState(() {});
-            }
+            autocam();
           }
         } catch (e) {
           print(e); //show error

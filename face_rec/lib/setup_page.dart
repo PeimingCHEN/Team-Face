@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'utils.dart';
+import 'dart:async';
+import 'package:image/image.dart' as imgpack;
 
 class SetUpPage extends StatefulWidget {
   const SetUpPage({Key? key}) : super(key: key);
@@ -69,63 +71,73 @@ class _SetUpPageState extends State<SetUpPage> {
           ),
         ),
       ),
-      body: Container(
-          child: Column(children: [
+      body: Column(children: [
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          height: 300,
-          width: 300,
+          // padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          height: 400,
+          width: 400,
           child: controller == null
               ? Center(child: Text("Loading Camera..."))
               : !controller!.value.isInitialized
                   ? Center(
                       child: CircularProgressIndicator(),
                     )
-                  : RotationTransition(
-                      turns: AlwaysStoppedAnimation(90 / 360),
+                  : Center(
                       child: CameraPreview(controller!),
-                    ),
+                    )
         ),
         takepic(),
-        Container(
-          //show captured image
-          padding: EdgeInsets.all(30),
-          child: image == null
-              ? Text("No image captured")
-              : Image.file(
-                  File(image!.path),
-                  height: 100,
-                ),
-          //display captured image
-        )
-      ])),
+      ])
     );
+  }
+
+  void autocam() async {
+    List<String> photos = [];
+    List<http.MultipartFile> newList = [];
+    if (controller != null) {
+      //check if contrller is not null
+      if (controller!.value.isInitialized) {
+        //check if controller is initialized
+        for (var i = 0; i < 10; i++) {
+          image = await controller!.takePicture(); //capture image
+          File file = File(image!.path);
+          // Read a jpeg image from file path
+          imgpack.Image? resizedImage =
+              imgpack.decodeImage(file.readAsBytesSync());
+          // Resize the image
+          resizedImage =
+              imgpack.copyResize(resizedImage!, width: 250, height: 250);
+          // Save the resize image
+          file = file
+            ..writeAsBytesSync(imgpack.encodeJpg(resizedImage, quality: 100));
+          photos.add(file.path);
+        }
+        for (var img in photos) {
+          if (img != "") {
+            var multipartFile = await http.MultipartFile.fromPath(
+              'images',
+              File(img).path,
+              filename: img.split('/').last,
+            );
+            newList.add(multipartFile);
+          }
+        }
+        int? userPhone = loginUserPreference!.getInt("phone");
+        String reqUrl = API.userUrl;
+        var request =
+            http.MultipartRequest('put', Uri.parse("$reqUrl/$userPhone"));
+        request.files.addAll(newList);
+        var res = await request.send();
+        setState(() {});
+      }
+    }
   }
 
   FloatingActionButton takepic() {
     return FloatingActionButton(
       onPressed: () async {
         try {
-          if (controller != null) {
-            //check if contrller is not null
-            if (controller!.value.isInitialized) {
-              //check if controller is initialized
-              image = await controller!.takePicture(); //capture image
-              File file = File(image!.path);
-              int? userPhone = loginUserPreference!.getInt("phone");
-              String reqUrl = API.userUrl;
-              var request = http.MultipartRequest(
-                  'put', Uri.parse("$reqUrl/$userPhone"));
-              // request.fields.addAll(
-              //   {'user': 'pm'}
-              // ); //后续可以在这里加其他修改的信息，如密码
-              request.files.add(http.MultipartFile.fromBytes(
-                  'images', File(file.path).readAsBytesSync(),
-                  filename: file.path));
-              var res = await request.send();
-              setState(() {});
-            }
-          }
+          autocam();
         } catch (e) {
           print(e); //show error
         }

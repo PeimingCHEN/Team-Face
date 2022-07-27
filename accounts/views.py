@@ -124,9 +124,11 @@ class user_apiview(APIView):
         serializer = UserSerializer(user,
                                     data=request.data)
         if serializer.is_valid():
-            image = request.FILES['images']
-            user_img = user.images.create()
-            user_img.image.save(image.name, image)
+            imagelist = dict((request.data).lists())['images']
+            user.images.all().delete()
+            for image in imagelist:
+                user_img = user.images.create()
+                user_img.image.save(image.name, image)
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors,
@@ -154,7 +156,7 @@ class test_img_apiview(APIView):
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         test_image_req = request.FILES['test_images']
+        user.test.all().delete()
         test_image = user.test.create()
         test_image.test_image.save(test_image_req.name, test_image_req)
-        # test_image.delete()
         return Response(status=status.HTTP_200_OK)
