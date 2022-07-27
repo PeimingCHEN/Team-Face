@@ -9,12 +9,10 @@ from accounts.serializers import (
     OrganizationSerializer,
     UserListSerializer,
     UserSerializer,
-    UserFaceImageSerializer,
 )
 from accounts.models import (
     Organization,
     User,
-    UserFaceImage
 )
 
 
@@ -118,13 +116,15 @@ class user_apiview(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, phone, format=None):
+        # 用户设置功能，包括上传anchor，及后续修改密码等操作
         user = self.get_object(phone)
         serializer = UserSerializer(user,
                                     data=request.data)
-        print(request.data)
         if serializer.is_valid():
+            image = request.FILES['images']
+            user_img = user.images.create()
+            user_img.image.save(image.name, image)
             serializer.save()
-            print(serializer.data)
             return Response(serializer.data)
         return Response(serializer.errors,
                         status=status.HTTP_400_BAD_REQUEST)
@@ -133,80 +133,3 @@ class user_apiview(APIView):
         user = self.get_object(phone)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class image_apiview(APIView):
-    def get(self, request, format=None):
-        imgs = UserFaceImage.objects.all()
-        serializer = UserFaceImageSerializer(imgs, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        # 用户注册功能
-        # 获得填写的邀请码
-        name = request.data.get('user')
-        
-        try:
-            # 根据邀请码获取组织
-            user = User.objects.get(name=name)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
-        data=request.data.copy()
-        image = request.FILES['images']
-        test = user.images.create()
-        test.image.save(image.name, image)
-        data['user'] = user.phone
-        # print(data)
-        serializer = UserFaceImageSerializer(data=data)
-        # 注册用户
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
-
-# class invitationcode_list_apiview(APIView):
-
-#     def get(self, request, format=None):
-#         invitations = InvitationCode.objects.all()
-#         serializer = InvitationCodeSerializer(invitations, many=True)
-#         return Response(serializer.data, safe=False)
-
-#     def post(self, request, format=None):
-#         serializer = InvitationCodeSerializer(data=JSONParser().parse(request))
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data,
-#                                 status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors,
-#                             status=status.HTTP_400_BAD_REQUEST)
-
-# class invitationcode_apiview(APIView):
-#     def get_object(self, code):
-#         try:
-#             return InvitationCode.objects.get(code=code)
-#         except InvitationCode.DoesNotExist:
-#             raise Http404
-
-#     def get(self, request, code, format=None):
-#         invitation_code = self.get_object(code)
-#         serializer = InvitationCodeSerializer(invitation_code)
-#         return Response(serializer.data)
-
-#     def put(self, request, code, format=None):
-#         invitation_code = self.get_object(code)
-#         serializer = InvitationCodeSerializer(invitation_code,
-#                                         data=JSONParser().parse(request))
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors,
-#                             status=status.HTTP_400_BAD_REQUEST)
-
-#     def delete(self, request, code, format=None):
-#         invitation_code = self.get_object(code)
-#         invitation_code.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
-

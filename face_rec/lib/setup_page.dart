@@ -104,10 +104,10 @@ class _SetUpPageState extends State<SetUpPage> {
               //check if controller is initialized
               image = await controller!.takePicture(); //capture image
               File file = File(image!.path);
-              var request = http.MultipartRequest('post', Uri.parse("http://10.0.2.2:8000/accounts/img"));
-              request.fields.addAll(
-                {'user': 'pm'}
-              );
+              var request = http.MultipartRequest('put', Uri.parse("http://10.0.2.2:8000/accounts/user/111"));
+              // request.fields.addAll(
+              //   {'user': 'pm'}
+              // ); //后续可以在这里加其他修改的信息，如密码
               request.files.add(http.MultipartFile.fromBytes('images', File(file.path).readAsBytesSync(),filename: file.path));
               var res = await request.send();
               setState(() {});
