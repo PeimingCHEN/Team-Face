@@ -8,6 +8,7 @@ db.sqlite3
 fr_algorithms/data/
 fr_algorithms/checkpoints/
 media/
+fr_algorithms/siamesemodelv2.h5
 
 # ignore files in __pycache__ folder
 **/__pycache__/*
