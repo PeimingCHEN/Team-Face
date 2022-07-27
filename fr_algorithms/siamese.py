@@ -7,7 +7,6 @@ import time
 from turtle import up
 import uuid
 from pathlib import Path
-# from backend.settings import BASE_DIR
 import random
 import cv2
 import numpy as np
@@ -20,7 +19,6 @@ from tensorflow.keras.metrics import Precision, Recall
 
 cur_dir = Path(__file__).resolve().parent
 BASE_DIR = Path(__file__).resolve().parent.parent
-print(BASE_DIR)
 anchor_path = os.path.join(cur_dir,'data/anchor')
 positive_path = os.path.join(cur_dir,'data/positive')
 negative_path = os.path.join(cur_dir,'data/negative')
@@ -300,9 +298,12 @@ def copy_face_images(user_phone):
 
     uploaded_photo_dir = os.path.join(BASE_DIR,'media/user',user_phone)
     images = os.listdir(uploaded_photo_dir)
+    user_anchor_path = os.path.join(BASE_DIR,'media/user',user_phone,'anchor')
+    if not os.path.exists(user_anchor_path):
+        os.makedirs(user_anchor_path)
     for img in images:
         img_path = os.path.join(uploaded_photo_dir,img)
-        new_path = os.path.join(BASE_DIR,'media/user',user_phone,'anchor',img)
+        new_path = os.path.join(user_anchor_path,img)
         shutil.copy(img_path,new_path)
 
 
@@ -311,27 +312,27 @@ def update_model_with_new_training_data(user_phone, learning_rate=0.00001):
 
     #get all the newly updated images' path
     uploaded_photo_dir = os.path.join(BASE_DIR,'media/user',user_phone)
-    images = [img for img in os.listdir(uploaded_photo_dir) if not img.startswith('.')]
-    image_paths = [os.path.join(uploaded_photo_dir,img) for img in images]
+    print('get the configured images paths at {}'.format(uploaded_photo_dir))
+    time.sleep(1)
+    images = (img for img in os.listdir(uploaded_photo_dir) if img.endswith('jpg'))
+    image_paths = (os.path.join(uploaded_photo_dir,img) for img in images)
 
     #augment the uploaed images
+    print('augmenting the images...')
     augment_images(image_paths)
 
-    augmented_images = [img for img in os.listdir(uploaded_photo_dir) if not img.startswith('.')]
-    augmented_image_paths = [os.path.join(uploaded_photo_dir,img) for img in augmented_images]
-    num_images = len(augmented_images)
-    neg_image_paths = os.listdir(negative_path) #get the negative images' paths
-
-    #split the images into anchor and positive sets, respectively
-    num_anchor = num_images // 2
-
-    anchor = augmented_image_paths[:num_anchor]
-    positive = augmented_image_paths[num_anchor:(num_anchor*2)]
-    negative = random.sample(neg_image_paths, num_anchor)
+    num_images = len([img for img in os.listdir(uploaded_photo_dir) if img.endswith('jpg')]) // 2
+    augmented_images = tf.data.Dataset.list_files(uploaded_photo_dir+'/*.jpg')
+    anchor = augmented_images.take(num_images)
+    positive = augmented_images.take(num_images)
+    negative = tf.data.Dataset.list_files(negative_path+'/*.jpg').take(num_images)
 
     #create the training data
-    negatives = tf.data.Dataset.zip(anchor, negative, tf.data.Dataset.from_tensor_slices(tf.zeros(len(anchor))))
+    print('create the learning data...')
+    time.sleep(1)
+    negatives = tf.data.Dataset.zip((anchor, negative, tf.data.Dataset.from_tensor_slices(tf.zeros(len(anchor))) ))
     positives = tf.data.Dataset.zip((anchor, positive, tf.data.Dataset.from_tensor_slices(tf.ones(len(anchor)))))
+    
     data = positives.concatenate(negatives)
 
     data = data.map(image_preprocess_twin)
@@ -351,11 +352,13 @@ def update_model_with_new_training_data(user_phone, learning_rate=0.00001):
 
     #reload model
     model_path = os.path.join(cur_dir,'siamesemodelv2.h5')
+    print('reload the existing model at {}...'.format(model_path))
     siamese_model = tf.keras.models.load_model(model_path, 
                     custom_objects={'L1Dist':L1Dist, 'BinaryCrossentropy':tf.losses.BinaryCrossentropy})
+    time.sleep(1)
 
     # train the model
-    EPOCHS = 50
+    EPOCHS = 3
     train(train_data, EPOCHS, siamese_model, learning_rate)
 
     #make predictions
@@ -367,52 +370,69 @@ def update_model_with_new_training_data(user_phone, learning_rate=0.00001):
         r.update_state(y_true, yhat)
         p.update_state(y_true, yhat) 
 
-    print(r.result().numpy(), p.result().numpy())
+    print('The testing recall {}...precision {}'.format(r.result().numpy(), p.result().numpy()))
+    time.sleep(1)
 
     # Save weights
-    siamese_model.save(os.path.join(cur_dir,'siamesemodelv2.h5'))
+    save_path = os.path.join(cur_dir,'siamesemodelv2.h5')
+    print('save the newly trained network to {}'.format(save_path))
+    siamese_model.save(save_path)
 
 
 #recognize one image   
-def recognize_image(test_img, anchor_img):
+def recognize(test_img, anchor_img):
 
     #reload model
     model_path = os.path.join(cur_dir,'siamesemodelv2.h5')
     siamese_model = tf.keras.models.load_model(model_path, 
                     custom_objects={'L1Dist':L1Dist, 'BinaryCrossentropy':tf.losses.BinaryCrossentropy})
 
-    #create the learning samples
-    test_input = image_preprocess(test_img)
-    anchor_input = image_preprocess(anchor_img)
+    y_pred = siamese_model.predict([test_img, anchor_img])
 
-    y_pred = siamese_model.predict([test_input,anchor_input])
-    return(y_pred,anchor_img)
+    return(y_pred)
 
     
 #pass through all anchor images, pick the most similar one,
 #compare it with the 0.8 threshold
 #if >= 0.8, then return the corresponding phone_number of the user
 #if < 0.8, then return 'unrecognized'
-def recognize_organization(test_img):
+def recognize_organization(phone):
 
-    anchor_image_dirs = os.listdir(os.path.join(BASE_DIR,'/media/user'))
+    user_test_image_dir = os.path.join(BASE_DIR,'media/user',phone,'test')
+    all_user_phones = [dir for dir in os.listdir(os.path.join(BASE_DIR,'media/user')) if not dir.startswith('.')]
+
     probabilities = []
-    for dir in anchor_image_dirs:
-        image_paths = [os.path.join(BASE_DIR,'/media/user',dir,img) for img 
-                    in os.listdir(os.path.join(BASE_DIR,'/media/user',dir))]
-        for anchor_img in image_paths:
-            probabilities.append(recognize_image(test_img, anchor_img))
+    test_img = tf.data.Dataset.list_files(user_test_image_dir+'/*.jpg').take(1)
+    for i, phone in enumerate(all_user_phones):
+        anchor_dir = os.path.join(BASE_DIR,'media/user',phone,'anchor')
+        anchor_images = tf.data.Dataset.list_files(anchor_dir+'/*.jpg')
+        for j in range(3):
+            anchor_img = anchor_images.take(1)
+            data = tf.data.Dataset.zip((test_img, anchor_img, tf.data.Dataset.from_tensor_slices(tf.zeros(1))))
+            data = data.map(image_preprocess_twin)
+            data = data.batch(1)
+            for test_input, anchor_input, label in data.as_numpy_iterator():
+                pred_prob = recognize(test_input, anchor_input)
+                probabilities.append((pred_prob[0][0],phone))
 
-    prob_path = max(probabilities, key=itemgetter(0))
-    if prob_path[0] > 0.8:
-        phone_number = prob_path[1].replace(os.path.join(BASE_DIR,'/media/user'),'').split('/')[0]
-        return(phone_number)
+    print(probabilities)
+    recog_prob, user_phone = max(probabilities, key=itemgetter(0))
+
+    print(user_phone)
+    print(recog_prob)
+    
+    if recog_prob > 0.8:
+        print('返回用户电话号码：{}'.format(user_phone))
+        return(user_phone)
+        
     else:
         return('unrecognized identity!')
 
 
 
 if __name__ == '__main__':
+
+    print('debugging...all functions')
 
     ## collect 
     #collect anchor images and positive images
@@ -426,8 +446,15 @@ if __name__ == '__main__':
     # print(len(positive_image_paths))
     # print(len(anchor_image_paths))
     # print(len(os.listdir(os.path.join(negative_path))))
-    train_initial_model(anchor_path, positive_path, negative_path, learning_rate=0.0001)
 
+    #train initial model
+    # train_initial_model(anchor_path, positive_path, negative_path, learning_rate=0.0001)
 
+    #test copy images from media/user/phone to media/user/phone/anchor
+    # copy_face_images('123')
 
+    #test 
+    # update_model_with_new_training_data('123', learning_rate=0.00001)
 
+    #test predictiton
+    # recognize_organization('123')
