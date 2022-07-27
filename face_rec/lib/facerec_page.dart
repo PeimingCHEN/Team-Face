@@ -38,7 +38,7 @@ class _FaceRecPageState extends State<FaceRecPage> {
           return;
         }
         setState(() {});
-        // autocam();
+        autocam();
       });
     } else {
       Fluttertoast.showToast(msg: '找不到相机');
@@ -73,12 +73,14 @@ class _FaceRecPageState extends State<FaceRecPage> {
           Fluttertoast.showToast(msg: '异常');
         });
       }
-      setState(() {});
     }
   }
 
   void showDialogFunction(String str) async {
-    await showDialog<bool>(
+    if (!mounted) {
+          return;
+        }
+    await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -89,6 +91,7 @@ class _FaceRecPageState extends State<FaceRecPage> {
             ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
+                  autocam();
                 },
                 child: Text("确定")),
           ],
@@ -133,21 +136,18 @@ class _FaceRecPageState extends State<FaceRecPage> {
                   ? Center(
                       child: CircularProgressIndicator(),
                     )
-                  : Stack(
-                      alignment: Alignment.center,
-                      children: [CameraPreview(controller!), takepicBTN()],
-                    )),
+                  : CameraPreview(controller!)),
     );
   }
 
-  FloatingActionButton takepicBTN() {
-    return FloatingActionButton(
-      onPressed: () {
-        if (controller != null) {
-          autocam();
-        }
-      },
-      child: const Icon(Icons.camera_alt),
-    );
-  }
+  // FloatingActionButton takepicBTN() {
+  //   return FloatingActionButton(
+  //     onPressed: () {
+  //       if (controller != null) {
+  //         autocam();
+  //       }
+  //     },
+  //     child: const Icon(Icons.camera_alt),
+  //   );
+  // }
 }

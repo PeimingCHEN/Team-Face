@@ -33,8 +33,6 @@ class _SetUpPageState extends State<SetUpPage> {
     cameras = await availableCameras();
     if (cameras != null) {
       controller = CameraController(cameras![1], ResolutionPreset.medium);
-      //cameras[0] = first camera, change to 1 to another camera
-
       controller!.initialize().then((_) {
         if (!mounted) {
           return;
@@ -60,35 +58,32 @@ class _SetUpPageState extends State<SetUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.indigo,
-        centerTitle: true,
-        title: Text(
-          "Team Face",
-          style: TextStyle(
-            fontStyle: FontStyle.italic,
-            fontWeight: FontWeight.bold,
+        appBar: AppBar(
+          backgroundColor: Colors.indigo,
+          centerTitle: true,
+          title: Text(
+            "Team Face",
+            style: TextStyle(
+              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
-      body: Column(children: [
-        Container(
-          // padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          height: 400,
-          width: 400,
-          child: controller == null
-              ? Center(child: Text("Loading Camera..."))
-              : !controller!.value.isInitialized
-                  ? Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : Center(
-                      child: CameraPreview(controller!),
-                    )
-        ),
-        takepic(),
-      ])
-    );
+        body: Column(children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: controller == null
+                ? Center(child: Text("Loading Camera..."))
+                : !controller!.value.isInitialized
+                    ? Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : Center(
+                        child: CameraPreview(controller!),
+                      ),
+          ),
+          takepic(),
+        ]));
   }
 
   void autocam() async {
@@ -127,10 +122,35 @@ class _SetUpPageState extends State<SetUpPage> {
         var request =
             http.MultipartRequest('put', Uri.parse("$reqUrl/$userPhone"));
         request.files.addAll(newList);
-        await request.send();
-        setState(() {});
+        var response = await request.send();
+        if (response.statusCode == 200) {
+          showDialogFunction('更新用户图像成功');
+        } else {
+          showDialogFunction('更新失败');
+        }
       }
     }
+  }
+
+  void showDialogFunction(String str) async {
+    if (!mounted) {
+      return;
+    }
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          actions: [
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("确定")),
+          ],
+          content: Text(str),
+        );
+      },
+    );
   }
 
   FloatingActionButton takepic() {
