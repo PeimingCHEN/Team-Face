@@ -430,7 +430,7 @@ def recognize_organization(phone):
         os.remove(os.path.join(user_test_image_dir,img))
     
     print(recog_prob)
-    if recog_prob > 0.8:
+    if recog_prob > 0.4:
         print('返回用户电话号码：{}'.format(user_phone))
         return(user_phone)
         
