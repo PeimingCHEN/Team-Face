@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'utils.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -115,7 +116,7 @@ class _SignUpPageState extends State<SignUpPage> {
           'password': password,
           };
         var response = await http.post(
-          Uri.parse("http://10.0.2.2:8000/accounts/user"),
+          Uri.parse(API.userUrl),
           body: data);
         if (response.statusCode == 201) {
           setState(() {

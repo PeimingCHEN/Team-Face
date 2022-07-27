@@ -2,7 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
+import 'utils.dart';
 
 class SetUpPage extends StatefulWidget {
   const SetUpPage({Key? key}) : super(key: key);
@@ -16,9 +18,11 @@ class _SetUpPageState extends State<SetUpPage> {
   List<CameraDescription>? cameras; //list out the camera available
   CameraController? controller; //controller for camera
   XFile? image; //for captured image
+  SharedPreferences? loginUserPreference; //get login user info
 
   @override
   void initState() {
+    fetchUser();
     loadCamera();
     super.initState();
   }
@@ -38,6 +42,10 @@ class _SetUpPageState extends State<SetUpPage> {
     } else {
       print("NO any camera found");
     }
+  }
+
+  fetchUser() async {
+    loginUserPreference = await SharedPreferences.getInstance();
   }
 
   @override
@@ -104,11 +112,16 @@ class _SetUpPageState extends State<SetUpPage> {
               //check if controller is initialized
               image = await controller!.takePicture(); //capture image
               File file = File(image!.path);
-              var request = http.MultipartRequest('put', Uri.parse("http://10.0.2.2:8000/accounts/user/111"));
+              int? userPhone = loginUserPreference!.getInt("phone");
+              String reqUrl = API.userUrl;
+              var request = http.MultipartRequest(
+                  'put', Uri.parse("$reqUrl/$userPhone"));
               // request.fields.addAll(
               //   {'user': 'pm'}
               // ); //后续可以在这里加其他修改的信息，如密码
-              request.files.add(http.MultipartFile.fromBytes('images', File(file.path).readAsBytesSync(),filename: file.path));
+              request.files.add(http.MultipartFile.fromBytes(
+                  'images', File(file.path).readAsBytesSync(),
+                  filename: file.path));
               var res = await request.send();
               setState(() {});
             }

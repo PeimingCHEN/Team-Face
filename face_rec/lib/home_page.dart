@@ -13,7 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late SharedPreferences sharedPreferences;
+  SharedPreferences? loginUserPreference;
 
   @override
   void initState() {
@@ -22,8 +22,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   checkLoginStatus() async {
-    sharedPreferences = await SharedPreferences.getInstance();
-    if (sharedPreferences.getInt("phone") == null) {
+    loginUserPreference = await SharedPreferences.getInstance();
+    if (loginUserPreference!.getInt("phone") == null) {
       if (!mounted) return;
       Navigator.pop(context);
     }
@@ -105,7 +105,7 @@ class _HomePageState extends State<HomePage> {
   ElevatedButton signoutBTN() {
     return ElevatedButton(
         onPressed: () {
-          sharedPreferences.clear();
+          loginUserPreference!.clear();
           Navigator.pop(context);
         },
         autofocus: true,
