@@ -13,7 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late SharedPreferences sharedPreferences;
+  SharedPreferences? loginUserPreference;
 
   @override
   void initState() {
@@ -22,8 +22,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   checkLoginStatus() async {
-    sharedPreferences = await SharedPreferences.getInstance();
-    if (sharedPreferences.getInt("phone") == null) {
+    loginUserPreference = await SharedPreferences.getInstance();
+    if (loginUserPreference!.getInt("phone") == null) {
       if (!mounted) return;
       Navigator.pop(context);
     }
@@ -80,14 +80,7 @@ class _HomePageState extends State<HomePage> {
 
   ElevatedButton facerecBTN() {
     return ElevatedButton(
-        onPressed: () async {
-          await availableCameras().then((value) => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FaceRecPage(
-                  camera: value[1],
-                ),
-              ))); //点击跳转人脸识别界面
+        onPressed: () {Navigator.of(context).pushNamed(FaceRecPage.tag); //点击跳转人脸识别界面
         },
         autofocus: true,
         style: ButtonStyle(
@@ -105,7 +98,7 @@ class _HomePageState extends State<HomePage> {
   ElevatedButton signoutBTN() {
     return ElevatedButton(
         onPressed: () {
-          sharedPreferences.clear();
+          loginUserPreference!.clear();
           Navigator.pop(context);
         },
         autofocus: true,

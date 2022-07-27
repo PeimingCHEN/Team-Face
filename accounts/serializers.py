@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Organization, User, UserFaceImage
+from .models import Organization, User, UserFaceImage, UserTestImage
 
 
 class OrganizationListSerializer(ModelSerializer):
@@ -33,10 +33,23 @@ class UserFaceImageSerializer(ModelSerializer):
         fields = '__all__'
 
 
+class UserTestImageSerializer(ModelSerializer):
+    class Meta:
+        model = UserTestImage
+        fields = '__all__'
+
+
 class UserSerializer(ModelSerializer):
     images = UserFaceImageSerializer(many=True, read_only=True)
     class Meta:
         model = User
         fields = '__all__'
-        extra_kwargs = {'__all__': {'required': False},}
+        extra_kwargs = {
+            'organization': {'required': False},
+            'name': {'required': False},
+            'email': {'required': False},
+            'password': {'required': False},
+            'phone': {'required': False},
+            # 'images':{'required': False}
+            }
 

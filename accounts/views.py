@@ -1,3 +1,4 @@
+from sre_parse import State
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,10 +10,12 @@ from accounts.serializers import (
     OrganizationSerializer,
     UserListSerializer,
     UserSerializer,
+    UserTestImageSerializer
 )
 from accounts.models import (
     Organization,
     User,
+    UserTestImage
 )
 
 
@@ -116,11 +119,16 @@ class user_apiview(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, phone, format=None):
+        # 用户设置功能，包括上传anchor，及后续修改密码等操作
         user = self.get_object(phone)
-        print(request.data)
         serializer = UserSerializer(user,
                                     data=request.data)
         if serializer.is_valid():
+            imagelist = dict((request.data).lists())['images']
+            user.images.all().delete()
+            for image in imagelist:
+                user_img = user.images.create()
+                user_img.image.save(image.name, image)
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors,
@@ -132,46 +140,23 @@ class user_apiview(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# class invitationcode_list_apiview(APIView):
+class test_img_apiview(APIView):
+    def get(self, request, format=None):
+        imgs = UserTestImage.objects.all()
+        serializer = UserTestImageSerializer(imgs, many=True)
+        return Response(serializer.data)
 
-#     def get(self, request, format=None):
-#         invitations = InvitationCode.objects.all()
-#         serializer = InvitationCodeSerializer(invitations, many=True)
-#         return Response(serializer.data, safe=False)
-
-#     def post(self, request, format=None):
-#         serializer = InvitationCodeSerializer(data=JSONParser().parse(request))
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data,
-#                                 status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors,
-#                             status=status.HTTP_400_BAD_REQUEST)
-
-# class invitationcode_apiview(APIView):
-#     def get_object(self, code):
-#         try:
-#             return InvitationCode.objects.get(code=code)
-#         except InvitationCode.DoesNotExist:
-#             raise Http404
-
-#     def get(self, request, code, format=None):
-#         invitation_code = self.get_object(code)
-#         serializer = InvitationCodeSerializer(invitation_code)
-#         return Response(serializer.data)
-
-#     def put(self, request, code, format=None):
-#         invitation_code = self.get_object(code)
-#         serializer = InvitationCodeSerializer(invitation_code,
-#                                         data=JSONParser().parse(request))
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors,
-#                             status=status.HTTP_400_BAD_REQUEST)
-
-#     def delete(self, request, code, format=None):
-#         invitation_code = self.get_object(code)
-#         invitation_code.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
-
+    def post(self, request, format=None):
+        # 用户上传人脸识别测试图像
+        # 获得上传图像用户的身份
+        phone = request.data.get('phone')
+        try:
+            # 根据手机号获取用户
+            user = User.objects.get(phone=phone)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        test_image_req = request.FILES['test_images']
+        user.test.all().delete()
+        test_image = user.test.create()
+        test_image.test_image.save(test_image_req.name, test_image_req)
+        return Response(status=status.HTTP_200_OK)

@@ -161,6 +161,8 @@ cython_debug/
 
 # Media Folders
 */media/
+media/
+
 
 # ignore VSCode debug settings
 .vscode/
