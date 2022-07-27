@@ -1,6 +1,8 @@
 #https://github.com/nicknochnack/FaceRecognition/blob/main/Facial%20Verification%20with%20a%20Siamese%20Network%20-%20Final.ipynb
 
 import os
+import shutil
+from operator import itemgetter
 from turtle import up
 import uuid
 from pathlib import Path
@@ -227,7 +229,6 @@ def train(data, EPOCHS, siamese_model, learning_rate=0.0001):
             checkpoint.save(file_prefix=checkpoint_prefix)
 
 
-
 def train_initial_model(anchor_path, positive_path, negative_path, learning_rate=0.0001):
 
     #create the training datasets
@@ -278,6 +279,17 @@ def train_initial_model(anchor_path, positive_path, negative_path, learning_rate
     siamese_model.save(os.path.join(cur_dir,'siamesemodelv2.h5'))
 
 
+# upon receiving the posted face images, 
+# make a copy and put them in /media/user/phone/anchor before augmenting them
+def copy_face_images(user_phone):
+
+    uploaded_photo_dir = os.path.join(BASE_DIR,'media/user',user_phone)
+    images = os.listdir(uploaded_photo_dir)
+    for img in images:
+        img_path = os.path.join(uploaded_photo_dir,img)
+        new_path = os.path.join(BASE_DIR,'media/user',user_phone,'anchor',img)
+        shutil.copy(img_path,new_path)
+
 
 #update the model for a newly registered user
 def update_model_with_new_training_data(user_phone, learning_rate=0.00001):
@@ -289,6 +301,7 @@ def update_model_with_new_training_data(user_phone, learning_rate=0.00001):
 
     #augment the uploaed images
     augment_images(image_paths)
+
     augmented_images = [img for img in os.listdir(uploaded_photo_dir) if not img.startswith('.')]
     augmented_image_paths = [os.path.join(uploaded_photo_dir,img) for img in augmented_images]
     num_images = len(augmented_images)
@@ -344,11 +357,44 @@ def update_model_with_new_training_data(user_phone, learning_rate=0.00001):
     # Save weights
     siamese_model.save(os.path.join(cur_dir,'siamesemodelv2.h5'))
 
-    
-def 
 
+#recognize one image   
+def recognize_image(test_img, anchor_img):
+
+    #reload model
+    model_path = os.path.join(cur_dir,'siamesemodelv2.h5')
+    siamese_model = tf.keras.models.load_model(model_path, 
+                    custom_objects={'L1Dist':L1Dist, 'BinaryCrossentropy':tf.losses.BinaryCrossentropy})
+
+    #create the learning samples
+    test_input = image_preprocess(test_img)
+    anchor_input = image_preprocess(anchor_img)
+
+    y_pred = siamese_model.predict([test_input,anchor_input])
+    return(y_pred,anchor_img)
 
     
+#pass through all anchor images, pick the most similar one,
+#compare it with the 0.8 threshold
+#if >= 0.8, then return the corresponding phone_number of the user
+#if < 0.8, then return 'unrecognized'
+def recognize_organization(test_img):
+
+    anchor_image_dirs = os.listdir(os.path.join(BASE_DIR,'/media/user'))
+    probabilities = []
+    for dir in anchor_image_dirs:
+        image_paths = [os.path.join(BASE_DIR,'/media/user',dir,img) for img 
+                    in os.listdir(os.path.join(BASE_DIR,'/media/user',dir))]
+        for anchor_img in image_paths:
+            probabilities.append(recognize_image(test_img, anchor_img))
+
+    prob_path = max(probabilities, key=itemgetter(0))
+    if prob_path[0] > 0.8:
+        phone_number = prob_path[1].replace(os.path.join(BASE_DIR,'/media/user'),'').split('/')[0]
+        return(phone_number)
+    else:
+        return('unrecognized identity!')
+
 
 
 if __name__ == '__main__':
