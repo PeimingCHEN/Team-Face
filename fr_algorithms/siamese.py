@@ -356,7 +356,6 @@ def update_model_with_new_training_data(user_phone, learning_rate=0.00001):
     siamese_model = tf.keras.models.load_model(model_path, 
                     custom_objects={'L1Dist':L1Dist, 'BinaryCrossentropy':tf.losses.BinaryCrossentropy})
     time.sleep(1)
-    
 
     # train the model
     EPOCHS = 3
@@ -416,11 +415,7 @@ def recognize_organization(phone):
                 pred_prob = recognize(test_input, anchor_input)
                 probabilities.append((pred_prob[0][0],phone))
 
-    print(probabilities)
     recog_prob, user_phone = max(probabilities, key=itemgetter(0))
-
-    print(user_phone)
-    print(recog_prob)
 
     #remove the test photo
     for img in os.listdir(user_test_image_dir):
