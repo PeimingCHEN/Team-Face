@@ -1,3 +1,4 @@
+from sre_parse import State
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,10 +10,12 @@ from accounts.serializers import (
     OrganizationSerializer,
     UserListSerializer,
     UserSerializer,
+    UserTestImageSerializer
 )
 from accounts.models import (
     Organization,
     User,
+    UserTestImage
 )
 
 
@@ -133,3 +136,25 @@ class user_apiview(APIView):
         user = self.get_object(phone)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class test_img_apiview(APIView):
+    def get(self, request, format=None):
+        imgs = UserTestImage.objects.all()
+        serializer = UserTestImageSerializer(imgs, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        # 用户上传人脸识别测试图像
+        # 获得上传图像用户的身份
+        phone = request.data.get('phone')
+        try:
+            # 根据手机号获取用户
+            user = User.objects.get(phone=phone)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        test_image_req = request.FILES['test_images']
+        test_image = user.test.create()
+        test_image.test_image.save(test_image_req.name, test_image_req)
+        # test_image.delete()
+        return Response(status=status.HTTP_200_OK)

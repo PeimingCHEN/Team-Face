@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Organization, User, UserFaceImage
+from .models import Organization, User, UserFaceImage, UserTestImage
 
 
 class OrganizationListSerializer(ModelSerializer):
@@ -30,6 +30,12 @@ class UserListSerializer(ModelSerializer):
 class UserFaceImageSerializer(ModelSerializer):
     class Meta:
         model = UserFaceImage
+        fields = '__all__'
+
+
+class UserTestImageSerializer(ModelSerializer):
+    class Meta:
+        model = UserTestImage
         fields = '__all__'
 
 
