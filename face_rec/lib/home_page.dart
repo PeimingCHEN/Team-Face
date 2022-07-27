@@ -80,14 +80,7 @@ class _HomePageState extends State<HomePage> {
 
   ElevatedButton facerecBTN() {
     return ElevatedButton(
-        onPressed: () async {
-          await availableCameras().then((value) => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FaceRecPage(
-                  camera: value[1],
-                ),
-              ))); //点击跳转人脸识别界面
+        onPressed: () {Navigator.of(context).pushNamed(FaceRecPage.tag); //点击跳转人脸识别界面
         },
         autofocus: true,
         style: ButtonStyle(

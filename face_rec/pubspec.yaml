@@ -39,6 +39,7 @@ dependencies:
   http: any
   shared_preferences: any
   fluttertoast: ^8.0.9
+  image: any
 
 
 dev_dependencies:
