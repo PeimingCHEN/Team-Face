@@ -32,7 +32,7 @@ class _FaceRecPageState extends State<FaceRecPage> {
   loadCamera() async {
     cameras = await availableCameras();
     if (cameras != null) {
-      controller = CameraController(cameras![1], ResolutionPreset.max);
+      controller = CameraController(cameras![1], ResolutionPreset.max, enableAudio: false);
       controller!.initialize().then((_) {
         if (!mounted) {
           return;

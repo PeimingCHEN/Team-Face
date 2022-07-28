@@ -21,6 +21,10 @@ class _SetUpPageState extends State<SetUpPage> {
   CameraController? controller; //controller for camera
   XFile? image; //for captured image
   SharedPreferences? loginUserPreference; //get login user info
+  List<String> poses = [
+    '请保持不动','请保持不动', '请张嘴', '请张嘴', '请抬头',
+    '请抬头', '请向左转', '请向左转', '请向右转', '请向右转',
+  ];
 
   @override
   void initState() {
@@ -32,7 +36,7 @@ class _SetUpPageState extends State<SetUpPage> {
   loadCamera() async {
     cameras = await availableCameras();
     if (cameras != null) {
-      controller = CameraController(cameras![1], ResolutionPreset.medium);
+      controller = CameraController(cameras![1], ResolutionPreset.medium, enableAudio: false);
       controller!.initialize().then((_) {
         if (!mounted) {
           return;
@@ -93,7 +97,10 @@ class _SetUpPageState extends State<SetUpPage> {
       //check if contrller is not null
       if (controller!.value.isInitialized) {
         //check if controller is initialized
-        for (var i = 0; i < 10; i++) {
+        for (String i in poses) {
+          await Future.delayed(const Duration(seconds: 2), () {
+            Fluttertoast.showToast(msg: i);
+          });
           image = await controller!.takePicture(); //capture image
           File file = File(image!.path);
           // Read a jpeg image from file path
