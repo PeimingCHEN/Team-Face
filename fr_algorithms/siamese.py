@@ -13,7 +13,6 @@ from tensorflow.keras.layers import Layer, Conv2D, Dense, MaxPooling2D, Input, F
 import tensorflow as tf
 from tensorflow.keras.metrics import Precision, Recall
 
-
 cur_dir = Path(__file__).resolve().parent
 BASE_DIR = Path(__file__).resolve().parent.parent
 anchor_path = os.path.join(cur_dir,'data/anchor')
@@ -72,18 +71,18 @@ def image_aug(img):
     
     return data
 
+
 def augment_images(image_paths):
     for img_path in image_paths:
         print('augmenting image {}...'.format(img_path))
         img = cv2.imread(img_path)
-        augmented_images = image_aug(img) 
+        augmented_images = image_aug(img)
         
         for image in augmented_images:
             image_name = '{}.jpg'.format(uuid.uuid1())
             new_path = '/'.join(img_path.split('/')[:-1])
             print('...save augmented image {}'.format(os.path.join(new_path,image_name)))
             cv2.imwrite(os.path.join(new_path, image_name), image.numpy())
-
 
 
 def image_preprocess(file_path):
@@ -234,9 +233,17 @@ def train_initial_model(anchor_path, positive_path, negative_path, learning_rate
 
     #create the training datasets
     print('create the training datasets...')
-    anchor = tf.data.Dataset.list_files(anchor_path+'/*.jpg').take(300)
-    positive = tf.data.Dataset.list_files(positive_path+'/*.jpg').take(300)
-    negative = tf.data.Dataset.list_files(negative_path+'/*.jpg').take(300)
+    # anchor = tf.data.Dataset.list_files(anchor_path+'/*.jpg', ).take(1000)
+    # positive = tf.data.Dataset.list_files(positive_path+'/*.jpg').take(1000)
+    peoples = os.listdir(anchor_path)
+    anchor = tf.data.Dataset.list_files(anchor_path+'/'+peoples[0]+'/*.jpg', shuffle=False)
+    positive = tf.data.Dataset.list_files(positive_path+'/'+peoples[0]+'/*.jpg', shuffle=False)
+    for i in range(1, len(peoples)):
+        anchor_temp = tf.data.Dataset.list_files(anchor_path+'/'+peoples[i]+'/*.jpg', shuffle=False)
+        anchor = anchor.concatenate(anchor_temp)
+        positive_temp = tf.data.Dataset.list_files(positive_path+'/'+peoples[i]+'/*.jpg', shuffle=False)
+        positive = positive.concatenate(positive_temp)
+    negative = tf.data.Dataset.list_files(negative_path+'/*.jpg').take(3496)
 
     negatives = tf.data.Dataset.zip((anchor, negative, tf.data.Dataset.from_tensor_slices(tf.zeros(len(anchor)))))
     positives = tf.data.Dataset.zip((anchor, positive, tf.data.Dataset.from_tensor_slices(tf.ones(len(anchor)))))
@@ -246,18 +253,19 @@ def train_initial_model(anchor_path, positive_path, negative_path, learning_rate
     print('build the train and test data partitions...')
     data = data.map(image_preprocess_twin)
     data = data.cache()
-    data = data.shuffle(buffer_size=10000)
+    data = data.shuffle(buffer_size=100)
 
     # training partition
-    train_data = data.take(round(len(data)*0.7))
-    train_data = train_data.batch(16)
-    train_data = train_data.prefetch(8)
+    # train_data = data.take(round(len(data)*0.7))
+    train_data = data.take(round(len(data)*1))
+    train_data = train_data.batch(32)
+    train_data = train_data.prefetch(16)
 
     # testing partition
-    test_data = data.skip(round(len(data)*0.7))
-    test_data = test_data.take(round(len(data)*0.3))
-    test_data = test_data.batch(16)
-    test_data = test_data.prefetch(8)
+    # test_data = data.skip(round(len(data)*0.7))
+    # test_data = test_data.take(round(len(data)*0.3))
+    # test_data = test_data.batch(16)
+    # test_data = test_data.prefetch(8)
 
     ## training
     # Siamese model
@@ -267,21 +275,21 @@ def train_initial_model(anchor_path, positive_path, negative_path, learning_rate
     # train the model
 
     print('training the model...')
-    time.sleep(5)
-    EPOCHS = 50
+    time.sleep(1)
+    EPOCHS = 10
     train(train_data, EPOCHS, siamese_model, learning_rate)
 
     #make predictions
-    r = Recall()
-    p = Precision()
+    # r = Recall()
+    # p = Precision()
 
-    for test_input, test_val, y_true in test_data.as_numpy_iterator():
-        yhat = siamese_model.predict([test_input, test_val])
-        r.update_state(y_true, yhat)
-        p.update_state(y_true,yhat) 
+    # for test_input, test_val, y_true in test_data.as_numpy_iterator():
+    #     yhat = siamese_model.predict([test_input, test_val])
+    #     r.update_state(y_true, yhat)
+    #     p.update_state(y_true,yhat) 
 
-    print('The testing recall {}...precision {}'.format(r.result().numpy(), p.result().numpy()))
-    time.sleep(10)
+    # print('The testing recall {}...precision {}'.format(r.result().numpy(), p.result().numpy()))
+    # time.sleep(10)
 
     # Save weights
     save_path = os.path.join(cur_dir,'siamesemodelv2.h5')
@@ -359,7 +367,7 @@ def update_model_with_new_training_data(user_phone, learning_rate=0.00001):
     time.sleep(1)
 
     # train the model
-    EPOCHS = 3
+    EPOCHS = 5
     train(train_data, EPOCHS, siamese_model, learning_rate)
 
     #make predictions
@@ -413,6 +421,7 @@ def recognize_organization(phone):
     test_img = tf.data.Dataset.list_files(user_test_image_dir+'/*.jpg').take(1)
     for i, phone in enumerate(all_user_phones):
         anchor_dir = os.path.join(BASE_DIR,'media/user',phone,'anchor')
+        # anchor_dir = os.path.join(BASE_DIR,'media/user',phone)
         anchor_images = tf.data.Dataset.list_files(anchor_dir+'/*.jpg')
         for j in range(3):
             anchor_img = anchor_images.take(1)
@@ -430,7 +439,7 @@ def recognize_organization(phone):
         os.remove(os.path.join(user_test_image_dir,img))
     
     print(recog_prob)
-    if recog_prob > 0.4:
+    if recog_prob > 0.7:
         print('返回用户电话号码：{}'.format(user_phone))
         return(user_phone)
         
@@ -441,7 +450,7 @@ def recognize_organization(phone):
 
 if __name__ == '__main__':
 
-    print('debugging...all functions')
+    # print('debugging...all functions')
 
     ## collect 
     #collect anchor images and positive images
@@ -457,7 +466,7 @@ if __name__ == '__main__':
     # print(len(os.listdir(os.path.join(negative_path))))
 
     #train initial model
-    # train_initial_model(anchor_path, positive_path, negative_path, learning_rate=0.0001)
+    train_initial_model(anchor_path, positive_path, negative_path, learning_rate=0.0001)
 
     #test copy images from media/user/phone to media/user/phone/anchor
     # copy_face_images('123')

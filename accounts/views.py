@@ -139,8 +139,8 @@ class user_apiview(APIView):
                 user_img.image.save(image.name, image)
             serializer.save()
             # train
-            siamese.copy_face_images(str(user.phone))
-            siamese.update_model_with_new_training_data(str(user.phone))
+            # siamese.copy_face_images(str(user.phone))
+            # siamese.update_model_with_new_training_data(str(user.phone))
             return Response(status=status.HTTP_200_OK)
         return Response(serializer.errors,
                         status=status.HTTP_400_BAD_REQUEST)
