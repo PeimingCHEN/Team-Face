@@ -174,7 +174,7 @@ class test_img_apiview(APIView):
         test_image = user.test.create()
         test_image.test_image.save(test_image_req.name, test_image_req)
         # test
-        result = siamese.recognize_organization(str(phone))
+        result = siamese.DeepFace_recognize_organization(str(phone))
         if result != 'unrecognized identity!':
             detect_user = User.objects.get(phone=int(result))
             result = detect_user.organization.name

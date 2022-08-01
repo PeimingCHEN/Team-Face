@@ -8,16 +8,25 @@ import uuid
 from pathlib import Path
 import cv2
 import numpy as np
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Layer, Conv2D, Dense, MaxPooling2D, Input, Flatten
+from keras.models import Model
+from keras.layers import Layer, Conv2D, Dense, MaxPooling2D, Input, Flatten
+import keras.backend as K
 import tensorflow as tf
-from tensorflow.keras.metrics import Precision, Recall
+from keras.metrics import Precision, Recall
+
 
 cur_dir = Path(__file__).resolve().parent
 BASE_DIR = Path(__file__).resolve().parent.parent
 anchor_path = os.path.join(cur_dir,'data/anchor')
 positive_path = os.path.join(cur_dir,'data/positive')
 negative_path = os.path.join(cur_dir,'data/negative')
+input_size = 100
+training_batch = 16
+
+# Avoid OOM errors by setting GPU Memory Consumption Growth
+gpus = tf.config.experimental.list_physical_devices('GPU')
+for gpu in gpus: 
+    tf.config.experimental.set_memory_growth(gpu, True)
 
 #collect anchor and positive images for training purpose
 def collect_anchor_pos_images(anchor_path, positive_path):
@@ -93,7 +102,7 @@ def image_preprocess(file_path):
     img = tf.io.decode_jpeg(byte_img)
     
     # Preprocessing steps - resizing the image to be 100x100x3
-    img = tf.image.resize(img, (100,100))
+    img = tf.image.resize(img, (input_size,input_size))
 
     # Scale image to be between 0 and 1 
     img = img / 255.0
@@ -108,7 +117,7 @@ def image_preprocess_twin(input_img,validation_img,label):
 
 #create embedding layer
 def make_embedding(): 
-    inp = Input(shape=(100,100,3), name='input_image')
+    inp = Input(shape=(input_size,input_size,3), name='input_image')
     
     # First block
     c1 = Conv2D(64, (10,10), activation='relu')(inp)
@@ -116,11 +125,11 @@ def make_embedding():
     
     # Second block
     c2 = Conv2D(128, (7,7), activation='relu')(m1)
-    m2 = MaxPooling2D(64, (2,2), padding='same')(c2)
+    m2 = MaxPooling2D(128, (2,2), padding='same')(c2)
     
     # Third block 
     c3 = Conv2D(128, (4,4), activation='relu')(m2)
-    m3 = MaxPooling2D(64, (2,2), padding='same')(c3)
+    m3 = MaxPooling2D(128, (2,2), padding='same')(c3)
     
     # Final embedding block
     c4 = Conv2D(256, (4,4), activation='relu')(m3)
@@ -139,7 +148,11 @@ class L1Dist(Layer):
        
     # Magic happens here - similarity calculation
     def call(self, input_embedding, validation_embedding):
-        return tf.math.abs(input_embedding - validation_embedding)
+        # return tf.math.abs(input_embedding - validation_embedding)
+        # distance_func = Lambda(lambda t: K.abs(t[0]-t[1]))
+        # return distance_func([input_embedding, validation_embedding])
+        sumSquared = K.sum(K.square(input_embedding - validation_embedding), axis=1,keepdims=True)
+        return K.sqrt(K.maximum(sumSquared, K.epsilon()))
 
 
 #create siamese model
@@ -148,10 +161,10 @@ def make_siamese_model():
     embedding = make_embedding()
     
     # Anchor image input in the network
-    input_image = Input(name='input_img', shape=(100,100,3))
+    input_image = Input(name='input_img', shape=(input_size,input_size,3))
     
     # Validation image in the network 
-    validation_image = Input(name='validation_img', shape=(100,100,3))
+    validation_image = Input(name='validation_img', shape=(input_size,input_size,3))
     
     # Combine siamese distance components
     siamese_layer = L1Dist()
@@ -192,7 +205,7 @@ def train_step(batch, opt, loss_func, siamese_model):
 
 
 #training loops
-def train(data, EPOCHS, siamese_model, learning_rate=0.0001):
+def train(data, EPOCHS, siamese_model, learning_rate):
 
     # setup loss and optimizer
     print('setup loss and optimizer')
@@ -222,12 +235,18 @@ def train(data, EPOCHS, siamese_model, learning_rate=0.0001):
             r.update_state(batch[2], yhat)
             p.update_state(batch[2], yhat) 
             progbar.update(idx+1)
+            print('  loss:', loss.numpy(), 
+            '  Precision:',p.result().numpy(), 
+            '  Recall:',r.result().numpy())
         print(loss.numpy(), r.result().numpy(), p.result().numpy())
         
         # Save checkpoints
-        if epoch % 10 == 0: 
-            checkpoint.save(file_prefix=checkpoint_prefix)
-
+        if epoch % 5 == 0: 
+            # checkpoint.save(file_prefix=checkpoint_prefix)
+            model_file_name = 'siamesemodelv2_epoch'+str(epoch)+'.h5'
+            save_path = os.path.join(cur_dir,model_file_name)
+            print('save the Epoch{} trained network to {}'.format(epoch, save_path))
+            siamese_model.save(save_path)
 
 def train_initial_model(anchor_path, positive_path, negative_path, learning_rate=0.0001):
 
@@ -251,21 +270,22 @@ def train_initial_model(anchor_path, positive_path, negative_path, learning_rate
 
     # build train and test partition
     print('build the train and test data partitions...')
+    data = data.shuffle(buffer_size=6992)
+    data = data.shuffle(buffer_size=6992, reshuffle_each_iteration=True,)
     data = data.map(image_preprocess_twin)
-    data = data.cache()
-    data = data.shuffle(buffer_size=100)
+    # data = data.cache()
 
     # training partition
-    # train_data = data.take(round(len(data)*0.7))
-    train_data = data.take(round(len(data)*1))
-    train_data = train_data.batch(32)
-    train_data = train_data.prefetch(16)
+    train_data = data.take(round(len(data)*0.8))
+    # train_data = data.take(round(len(data)*1))
+    train_data = train_data.batch(training_batch)
+    train_data = train_data.prefetch(8)
 
     # testing partition
-    # test_data = data.skip(round(len(data)*0.7))
-    # test_data = test_data.take(round(len(data)*0.3))
-    # test_data = test_data.batch(16)
-    # test_data = test_data.prefetch(8)
+    test_data = data.skip(round(len(data)*0.8))
+    test_data = test_data.take(round(len(data)*0.2))
+    test_data = test_data.batch(training_batch)
+    test_data = test_data.prefetch(8)
 
     ## training
     # Siamese model
@@ -275,20 +295,20 @@ def train_initial_model(anchor_path, positive_path, negative_path, learning_rate
     # train the model
 
     print('training the model...')
-    time.sleep(1)
-    EPOCHS = 10
+    # time.sleep(1)
+    EPOCHS = 100
     train(train_data, EPOCHS, siamese_model, learning_rate)
 
     #make predictions
-    # r = Recall()
-    # p = Precision()
+    r = Recall()
+    p = Precision()
 
-    # for test_input, test_val, y_true in test_data.as_numpy_iterator():
-    #     yhat = siamese_model.predict([test_input, test_val])
-    #     r.update_state(y_true, yhat)
-    #     p.update_state(y_true,yhat) 
+    for test_input, test_val, y_true in test_data.as_numpy_iterator():
+        yhat = siamese_model.predict([test_input, test_val])
+        r.update_state(y_true, yhat)
+        p.update_state(y_true,yhat) 
 
-    # print('The testing recall {}...precision {}'.format(r.result().numpy(), p.result().numpy()))
+    print('The testing recall {}...precision {}'.format(r.result().numpy(), p.result().numpy()))
     # time.sleep(10)
 
     # Save weights
@@ -345,7 +365,7 @@ def update_model_with_new_training_data(user_phone, learning_rate=0.00001):
     data = positives.concatenate(negatives)
 
     data = data.map(image_preprocess_twin)
-    data = data.cache()
+    # data = data.cache()
     data = data.shuffle(buffer_size=10000)
 
     #training partition
@@ -445,7 +465,6 @@ def recognize_organization(phone):
         
     else:
         return('unrecognized identity!')
-
 
 
 if __name__ == '__main__':
