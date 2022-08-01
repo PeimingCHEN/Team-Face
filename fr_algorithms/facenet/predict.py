@@ -32,7 +32,7 @@ def FaceNet_recognize_organization(phone):
     os.remove(test_img_dir)
     
     print(recog_prob)
-    if recog_prob < 0.7:
+    if recog_prob < 0.8:
         print('返回用户电话号码：{}'.format(user_phone))
         return(user_phone)
         
