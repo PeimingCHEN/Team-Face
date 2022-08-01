@@ -22,8 +22,16 @@ class _SetUpPageState extends State<SetUpPage> {
   XFile? image; //for captured image
   SharedPreferences? loginUserPreference; //get login user info
   List<String> poses = [
-    '请保持不动','请保持不动', '请张嘴', '请张嘴', '请抬头',
-    '请抬头', '请向左转', '请向左转', '请向右转', '请向右转',
+    '请保持不动',
+    '请保持不动',
+    '请张嘴',
+    '请张嘴',
+    '请抬头',
+    '请抬头',
+    '请向左转',
+    '请向左转',
+    '请向右转',
+    '请向右转',
   ];
 
   @override
@@ -36,7 +44,8 @@ class _SetUpPageState extends State<SetUpPage> {
   loadCamera() async {
     cameras = await availableCameras();
     if (cameras != null) {
-      controller = CameraController(cameras![1], ResolutionPreset.medium, enableAudio: false);
+      controller = CameraController(cameras![1], ResolutionPreset.medium,
+          enableAudio: false);
       controller!.initialize().then((_) {
         if (!mounted) {
           return;
@@ -107,8 +116,9 @@ class _SetUpPageState extends State<SetUpPage> {
           imgpack.Image? resizedImage =
               imgpack.decodeImage(file.readAsBytesSync());
           // Resize the image
+          resizedImage = imgpack.copyRotate(resizedImage!, 270);
           resizedImage =
-              imgpack.copyResize(resizedImage!, width: 250, height: 250);
+              imgpack.copyResize(resizedImage, width: 160, height: 160);
           // Save the resize image
           file = file
             ..writeAsBytesSync(imgpack.encodeJpg(resizedImage, quality: 100));
@@ -150,6 +160,7 @@ class _SetUpPageState extends State<SetUpPage> {
           actions: [
             ElevatedButton(
                 onPressed: () {
+                  Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 },
                 child: Text("确定")),

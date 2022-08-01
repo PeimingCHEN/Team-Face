@@ -53,7 +53,8 @@ class _FaceRecPageState extends State<FaceRecPage> {
       // Read a jpeg image from file path
       imgpack.Image? resizedImage = imgpack.decodeImage(file.readAsBytesSync());
       // Resize the image
-      resizedImage = imgpack.copyResize(resizedImage!, width: 250, height: 250);
+      resizedImage = imgpack.copyRotate(resizedImage!, 270);
+      resizedImage = imgpack.copyResize(resizedImage, width: 160, height: 160);
       // Save the resize image
       file = file
         ..writeAsBytesSync(imgpack.encodeJpg(resizedImage, quality: 100));
@@ -91,7 +92,7 @@ class _FaceRecPageState extends State<FaceRecPage> {
             ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  autocam();
+                  Navigator.of(context).pop();
                 },
                 child: Text("确定")),
           ],

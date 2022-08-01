@@ -54,7 +54,7 @@ class User(models.Model):
 
 
 def user_directory_path(instance, filename):
-    return 'user/{}/{}'.format(instance.user.phone, filename)
+    return 'user/{}/anchor/{}'.format(instance.user.phone, filename)
 
 def test_directory_path(instance, filename):
     return 'user/{}/test/{}'.format(instance.user.phone, filename)

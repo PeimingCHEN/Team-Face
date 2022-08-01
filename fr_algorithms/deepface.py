@@ -17,7 +17,12 @@ def DeepFace_recognize_organization(phone):
         anchor_dir = os.path.join(BASE_DIR,'media/user',phone,'anchor')
         for img in os.listdir(anchor_dir):
             anchor_img = anchor_dir+'/'+ img
-            result_dic = DeepFace.verify(img1_path = test_img, img2_path = anchor_img, enforce_detection = False)
+            try:
+                result_dic = DeepFace.verify(
+                    img1_path = test_img, img2_path = anchor_img,
+                    detector_backend='ssd', model_name='Facenet512')
+            except ValueError:
+                return ('找不到脸部')
             distances.append((result_dic['distance'], phone))
     recog_distances, user_phone = min(distances, key=itemgetter(0))
 
@@ -25,9 +30,9 @@ def DeepFace_recognize_organization(phone):
     os.remove(test_img)
     
     print(recog_distances)
-    if recog_distances < 0.4:
+    if recog_distances < 0.2:
         print('返回用户电话号码：{}'.format(user_phone))
         return(user_phone)
         
     else:
-        return('unrecognized identity!')
+        return('无法识别身份')

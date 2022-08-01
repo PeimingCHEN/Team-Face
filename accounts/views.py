@@ -21,6 +21,8 @@ from accounts.models import (
     TestImage_delete
 )
 import fr_algorithms.siamese as siamese
+from fr_algorithms.facenet.predict import FaceNet_recognize_organization
+from fr_algorithms.deepface import DeepFace_recognize_organization
 
 
 # @permission_classes([IsAuthenticated])
@@ -136,6 +138,7 @@ class user_apiview(APIView):
 
             for image in imagelist:
                 user_img = user.images.create()
+                print(type(image))
                 user_img.image.save(image.name, image)
             serializer.save()
             # train
@@ -174,11 +177,10 @@ class test_img_apiview(APIView):
         test_image = user.test.create()
         test_image.test_image.save(test_image_req.name, test_image_req)
         # test
-        result = siamese.DeepFace_recognize_organization(str(phone))
-        if result != 'unrecognized identity!':
+        result = FaceNet_recognize_organization(str(phone))
+        # result = DeepFace_recognize_organization(str(phone))
+        if result != '无法识别身份' and result != '找不到脸部':
             detect_user = User.objects.get(phone=int(result))
             result = detect_user.organization.name
-        else:
-            result = '无法识别身份'
         result='{"result":"'+result+'"}'
         return Response(json.loads(result), status=status.HTTP_200_OK)
