@@ -19,7 +19,7 @@ class SetUpPage extends StatefulWidget {
 class _SetUpPageState extends State<SetUpPage> {
   List<CameraDescription>? cameras; //list out the camera available
   CameraController? controller; //controller for camera
-  XFile? image; //for captured image
+  // XFile? image; //for captured image
   SharedPreferences? loginUserPreference; //get login user info
   List<String> poses = [
     '请保持不动',
@@ -111,22 +111,24 @@ class _SetUpPageState extends State<SetUpPage> {
       if (controller!.value.isInitialized) {
         //check if controller is initialized
         for (String i in poses) {
-          await Future.delayed(const Duration(seconds: 2), () {
-            Fluttertoast.showToast(msg: i);
+          await Future.delayed(const Duration(milliseconds: 2500), () async {
+            await Fluttertoast.showToast(
+              msg: i,
+              timeInSecForIosWeb: 1,
+            );
+            XFile image = await controller!.takePicture();
+            File file = File(image.path);
+            // Read a jpeg image from file path
+            imgpack.Image? resizedImage =
+                imgpack.decodeImage(file.readAsBytesSync());
+            // Resize the image
+            resizedImage =
+                imgpack.copyResize(resizedImage!, width: 160, height: 160);
+            // Save the resize image
+            file = file
+              ..writeAsBytesSync(imgpack.encodeJpg(resizedImage, quality: 100));
+            photos.add(file.path);
           });
-          image = await controller!.takePicture(); //capture image
-          File file = File(image!.path);
-          // Read a jpeg image from file path
-          imgpack.Image? resizedImage =
-              imgpack.decodeImage(file.readAsBytesSync());
-          // Resize the image
-          // resizedImage = imgpack.copyRotate(resizedImage!, 270);
-          resizedImage =
-              imgpack.copyResize(resizedImage!, width: 160, height: 160);
-          // Save the resize image
-          file = file
-            ..writeAsBytesSync(imgpack.encodeJpg(resizedImage, quality: 100));
-          photos.add(file.path);
         }
         for (var img in photos) {
           if (img != "") {
