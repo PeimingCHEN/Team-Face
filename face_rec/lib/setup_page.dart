@@ -92,11 +92,11 @@ class _SetUpPageState extends State<SetUpPage> {
                         child: CircularProgressIndicator(),
                       )
                     : Center(
-                        // child: CameraPreview(controller!),
-                        child: RotationTransition(
-                          turns: AlwaysStoppedAnimation(90 / 360),
-                          child: CameraPreview(controller!),
-                        ),
+                        child: CameraPreview(controller!),
+                        // child: RotationTransition(
+                        //   turns: AlwaysStoppedAnimation(90 / 360),
+                        //   child: CameraPreview(controller!),
+                        // ),
                       ),
           ),
           takepic(),
@@ -120,9 +120,9 @@ class _SetUpPageState extends State<SetUpPage> {
           imgpack.Image? resizedImage =
               imgpack.decodeImage(file.readAsBytesSync());
           // Resize the image
-          resizedImage = imgpack.copyRotate(resizedImage!, 270);
+          // resizedImage = imgpack.copyRotate(resizedImage!, 270);
           resizedImage =
-              imgpack.copyResize(resizedImage, width: 160, height: 160);
+              imgpack.copyResize(resizedImage!, width: 160, height: 160);
           // Save the resize image
           file = file
             ..writeAsBytesSync(imgpack.encodeJpg(resizedImage, quality: 100));

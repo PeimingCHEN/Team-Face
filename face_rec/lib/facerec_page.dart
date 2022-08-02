@@ -54,8 +54,8 @@ class _FaceRecPageState extends State<FaceRecPage> {
       // Read a jpeg image from file path
       imgpack.Image? resizedImage = imgpack.decodeImage(file.readAsBytesSync());
       // Resize the image
-      resizedImage = imgpack.copyRotate(resizedImage!, 270);
-      resizedImage = imgpack.copyResize(resizedImage, width: 160, height: 160);
+      // resizedImage = imgpack.copyRotate(resizedImage!, 270);
+      resizedImage = imgpack.copyResize(resizedImage!, width: 160, height: 160);
       // Save the resize image
       file = file
         ..writeAsBytesSync(imgpack.encodeJpg(resizedImage, quality: 100));
@@ -117,18 +117,18 @@ class _FaceRecPageState extends State<FaceRecPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.indigo,
-          centerTitle: true,
-          title: Text(
-            "Team Face",
-            style: TextStyle(
-              fontStyle: FontStyle.italic,
-              fontWeight: FontWeight.bold,
-            ),
+      appBar: AppBar(
+        backgroundColor: Colors.indigo,
+        centerTitle: true,
+        title: Text(
+          "Team Face",
+          style: TextStyle(
+            fontStyle: FontStyle.italic,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        body: Container(
+      ),
+      body: Container(
           padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
@@ -138,12 +138,12 @@ class _FaceRecPageState extends State<FaceRecPage> {
                   ? Center(
                       child: CircularProgressIndicator(),
                     )
-                  // : CameraPreview(controller!)),
-                  : RotationTransition(
-                      turns: AlwaysStoppedAnimation(90 / 360),
-                      child: CameraPreview(controller!),
-                    ),
-        ));
+                  : CameraPreview(controller!)),
+      // : RotationTransition(
+      //     turns: AlwaysStoppedAnimation(90 / 360),
+      //     child: CameraPreview(controller!),
+      //   ),
+    );
   }
 
   // FloatingActionButton takepicBTN() {
