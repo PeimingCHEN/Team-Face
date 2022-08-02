@@ -32,7 +32,8 @@ class _FaceRecPageState extends State<FaceRecPage> {
   loadCamera() async {
     cameras = await availableCameras();
     if (cameras != null) {
-      controller = CameraController(cameras![1], ResolutionPreset.max, enableAudio: false);
+      controller = CameraController(cameras![1], ResolutionPreset.max,
+          enableAudio: false);
       controller!.initialize().then((_) {
         if (!mounted) {
           return;
@@ -79,8 +80,8 @@ class _FaceRecPageState extends State<FaceRecPage> {
 
   void showDialogFunction(String str) async {
     if (!mounted) {
-          return;
-        }
+      return;
+    }
     await showDialog(
       context: context,
       builder: (context) {
@@ -116,18 +117,18 @@ class _FaceRecPageState extends State<FaceRecPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.indigo,
-        centerTitle: true,
-        title: Text(
-          "Team Face",
-          style: TextStyle(
-            fontStyle: FontStyle.italic,
-            fontWeight: FontWeight.bold,
+        appBar: AppBar(
+          backgroundColor: Colors.indigo,
+          centerTitle: true,
+          title: Text(
+            "Team Face",
+            style: TextStyle(
+              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
-      body: Container(
+        body: Container(
           padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
@@ -137,8 +138,12 @@ class _FaceRecPageState extends State<FaceRecPage> {
                   ? Center(
                       child: CircularProgressIndicator(),
                     )
-                  : CameraPreview(controller!)),
-    );
+                  // : CameraPreview(controller!)),
+                  : RotationTransition(
+                      turns: AlwaysStoppedAnimation(90 / 360),
+                      child: CameraPreview(controller!),
+                    ),
+        ));
   }
 
   // FloatingActionButton takepicBTN() {

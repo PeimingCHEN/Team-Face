@@ -138,7 +138,6 @@ class user_apiview(APIView):
 
             for image in imagelist:
                 user_img = user.images.create()
-                print(type(image))
                 user_img.image.save(image.name, image)
             serializer.save()
             # train

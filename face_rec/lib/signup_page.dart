@@ -28,110 +28,120 @@ class _SignUpPageState extends State<SignUpPage> {
         title: Text("用户注册"),
       ),
       body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: Form(
-          child: _isLoading
-              ? Center(child: CircularProgressIndicator())
-              : ListView(
-                children: [
-                  const Text(
-                      "Team Face",
-                      style: TextStyle(
-                        fontSize: 40,
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.bold,
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Form(
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : ListView(
+                    children: [
+                      const Text(
+                        "Team Face",
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  SizedBox(height: 10),
-                  TextFormField(
-                    controller: invitationController,
-                    decoration: InputDecoration(
-                      hintText: "请输入邀请码",
-                    ),
+                      SizedBox(height: 10),
+                      TextFormField(
+                        controller: invitationController,
+                        decoration: InputDecoration(
+                          hintText: "请输入邀请码",
+                        ),
+                      ),
+                      SizedBox(height: 15),
+                      TextFormField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          hintText: "请输入姓名",
+                        ),
+                      ),
+                      SizedBox(height: 15),
+                      TextFormField(
+                        controller: emailController,
+                        decoration: InputDecoration(
+                          hintText: "请输入邮箱",
+                        ),
+                      ),
+                      SizedBox(height: 15),
+                      TextFormField(
+                        controller: phoneController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: "请输入手机号码",
+                        ),
+                      ),
+                      SizedBox(height: 15),
+                      TextFormField(
+                        controller: passwordController,
+                        decoration: InputDecoration(
+                          hintText: "请输入登录密码",
+                        ),
+                        obscureText: true,
+                      ),
+                      SizedBox(height: 15),
+                      TextFormField(
+                        controller: repasswordController,
+                        decoration: InputDecoration(
+                          hintText: "请再次输入登录密码",
+                        ),
+                        obscureText: true,
+                      ),
+                      SizedBox(height: 30),
+                      signupBTN()
+                    ],
                   ),
-                  SizedBox(height: 15),
-                  TextFormField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      hintText: "请输入姓名",
-                    ),
-                  ),
-                  SizedBox(height: 15),
-                  TextFormField(
-                    controller: emailController,
-                    decoration: InputDecoration(
-                      hintText: "请输入邮箱",
-                    ),
-                  ),
-                  SizedBox(height: 15),
-                  TextFormField(
-                    controller: phoneController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: "请输入手机号码",
-                    ),
-                  ),
-                  SizedBox(height: 15),
-                  TextFormField(
-                    controller: passwordController,
-                    decoration: InputDecoration(
-                      hintText: "请输入登录密码",
-                    ),
-                    obscureText: true,
-                  ),
-                  SizedBox(height: 15),
-                  TextFormField(
-                    controller: repasswordController,
-                    decoration: InputDecoration(
-                      hintText: "请再次输入登录密码",
-                    ),
-                    obscureText: true,
-                  ),
-                  SizedBox(height: 30),
-                  signupBTN()
-                ],
-              ),
-          )
-        ),
+          )),
     );
   }
 
-  signup(
-    String invitation, String name, String email, String phone,
-    String password, String repassword)
-    async {
-      if (password != repassword) {
+  signup(String invitation, String name, String email, String phone,
+      String password, String repassword) async {
+    if (password != repassword) {
+      setState(() {
+        _isLoading = false;
+        Fluttertoast.showToast(msg: '密码不一致');
+      });
+    } else if (!checkphone(phone)) {
+      setState(() {
+        _isLoading = false;
+        Fluttertoast.showToast(msg: '手机号输入有误');
+      });
+    } else if (!checkemail(email)) {
+      setState(() {
+        _isLoading = false;
+        Fluttertoast.showToast(msg: '邮箱输入有误');
+      });
+    } else if (!checkStringLength(password, 6)) {
+      setState(() {
+        _isLoading = false;
+        Fluttertoast.showToast(msg: '密码不能小于6位');
+      });
+    } else {
+      Map data = {
+        'organization': invitation,
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'password': password,
+      };
+      var response = await http.post(Uri.parse(API.userUrl), body: data);
+      if (response.statusCode == 201) {
         setState(() {
           _isLoading = false;
-          Fluttertoast.showToast(msg: '密码不一致');
+          Fluttertoast.showToast(msg: '注册成功');
+          Navigator.pop(context);
         });
       } else {
-        Map data = {
-          'organization': invitation,
-          'name': name,
-          'email': email,
-          'phone': phone,
-          'password': password,
-          };
-        var response = await http.post(
-          Uri.parse(API.userUrl),
-          body: data);
-        if (response.statusCode == 201) {
-          setState(() {
-            _isLoading = false;
-            Fluttertoast.showToast(msg: '注册成功');
-            Navigator.pop(context);
-          });
-        } else {
-          setState(() {
-            _isLoading = false;
-            Fluttertoast.showToast(msg: '注册失败');
-          });
-        }
+        setState(() {
+          _isLoading = false;
+          Fluttertoast.showToast(msg: '注册失败');
+        });
       }
     }
+  }
 
   ElevatedButton signupBTN() {
     return ElevatedButton(
@@ -139,13 +149,14 @@ class _SignUpPageState extends State<SignUpPage> {
           setState(() {
             _isLoading = true;
           });
+
           signup(
-            invitationController.text,
-            nameController.text,
-            emailController.text,
-            phoneController.text, 
-            passwordController.text,
-            repasswordController.text);
+              invitationController.text,
+              nameController.text,
+              emailController.text,
+              phoneController.text,
+              passwordController.text,
+              repasswordController.text);
         },
         autofocus: true,
         style: ButtonStyle(

@@ -92,7 +92,11 @@ class _SetUpPageState extends State<SetUpPage> {
                         child: CircularProgressIndicator(),
                       )
                     : Center(
-                        child: CameraPreview(controller!),
+                        // child: CameraPreview(controller!),
+                        child: RotationTransition(
+                          turns: AlwaysStoppedAnimation(90 / 360),
+                          child: CameraPreview(controller!),
+                        ),
                       ),
           ),
           takepic(),
