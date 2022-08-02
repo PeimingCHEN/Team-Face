@@ -3,7 +3,7 @@
    <application
         android:label="Team Face"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/teamface">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -1,4 +1,4 @@
-# https://github.com/bubbliiiing/facenet-pytorch
+# https://github.com/bubbliiiing/facenet-tf2
 import os
 import numpy as np
 from pathlib import Path

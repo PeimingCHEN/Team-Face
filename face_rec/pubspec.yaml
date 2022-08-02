@@ -35,7 +35,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   # A Flutter plugin for iOS, Android and Web allowing access to the device cameras.
-  camera: ^0.9.4+1
+  camera: any
   http: any
   shared_preferences: any
   fluttertoast: ^8.0.9
