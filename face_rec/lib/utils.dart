@@ -1,6 +1,5 @@
 class API {
-  static String rootUrl = 'http://39.103.167.15:5950/accounts';
-  // static String rootUrl = 'http://10.0.2.2:8000/accounts';
+  static String rootUrl = 'http://10.0.2.2:8000/accounts';
   static String userUrl = '$rootUrl/user';
   static String organizationUrl = '$rootUrl/organization';
   static String testimgUrl = '$rootUrl/testimg';
