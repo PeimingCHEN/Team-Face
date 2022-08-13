@@ -13,5 +13,5 @@ Administrator system & Android APK installation package: click [here](http://39.
 
 ## Screenshots
 ![](https://github.com/PeimingCHEN/Team-Face/raw/master/demo/login.jpg)  |  ![](https://github.com/PeimingCHEN/Team-Face/raw/master/demo/signup.jpg)
-<!-- :-------------------------:|:-------------------------: -->
 Login             |  Signup
+:-------------------------:|:-------------------------:
