@@ -12,6 +12,4 @@ Administrator system & Android APK installation package: click [here](http://39.
 * The administrator can manage user data in the administrator system, such as modifying user information, adding organizations, setting registration codes, etc.
 
 ## Demo
-<img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/login.jpg" width="180"/>
-<img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/signup.jpg" width="180"/>
-<img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/home.jpg" width="180"/>
+<img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/login.jpg" width="180"/> <img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/signup.jpg" width="180"/> <img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/home.jpg" width="180"/>
