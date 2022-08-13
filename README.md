@@ -11,7 +11,5 @@ Administrator system & Android APK installation package: click [here](http://39.
 * The bound organization will be displayed if the face recognition is successful.
 * The administrator can manage user data in the administrator system, such as modifying user information, adding organizations, setting registration codes, etc.
 
-## Screenshots
-![](https://github.com/PeimingCHEN/Team-Face/raw/master/demo/login.jpg)  |  ![](https://github.com/PeimingCHEN/Team-Face/raw/master/demo/signup.jpg)
-Login             |  Signup
-:-------------------------:|:-------------------------:
+## Demo
+<img src="demo/login.jpg" alt="login" width="200"/><img src="demo/signup.jpg" alt="signup" width="200"/>
