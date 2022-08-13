@@ -14,9 +14,9 @@ Administrator system & Android APK installation package: click [here](http://39.
 ## Demo
 <figure class="third">
   <img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/login.jpg">
-  <figcaption align = "center"><b>login</b></figcaption>
+<!--   <figcaption align = "center"><b>login</b></figcaption> -->
   <img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/signup.jpg">
-  <figcaption align = "center"><b>registration</b></figcaption>
+<!--   <figcaption align = "center"><b>registration</b></figcaption> -->
   <img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/home.jpg">
-  <figcaption align = "center"><b>home</b></figcaption>
+<!--   <figcaption align = "center"><b>home</b></figcaption> -->
 </figure>
