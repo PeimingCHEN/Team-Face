@@ -23,6 +23,6 @@ TeamFace, an android app, applied the face recognition deep learning algorithm t
 </p>
 
 ## Reference
-Face-Net: https://github.com/bubbliiiing/facenet-tf2 
-Siamese-Net: https://github.com/nicknochnack/FaceRecognition
+Face-Net: https://github.com/bubbliiiing/facenet-tf2 <br>
+Siamese-Net: https://github.com/nicknochnack/FaceRecognition <br>
 Deepface: https://github.com/serengil/deepface 
