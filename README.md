@@ -13,5 +13,6 @@ Administrator system & Android APK installation package: click [here](http://39.
 
 ## Demo
 <p align="center">
-<img src="demo/login.jpg" alt="login" width="250"/> <img src="demo/signup.jpg" alt="signup" width="250"/> <img src="demo/home.jpg" alt="home" width="250"/> </p><br>
+<img src="demo/login.jpg" alt="login" width="250"/> <img src="demo/signup.jpg" alt="signup" width="250"/> <img src="demo/home.jpg" alt="home" width="250"/><br>
 <img src="demo/setting_success.jpg" alt="setting_success" width="250"/> <img src="demo/rec_success.jpg" alt="rec_success" width="250"/> <img src="demo/rec_failed.jpg" alt="rec_failed" width="250"/>
+</p>
