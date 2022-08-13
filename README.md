@@ -5,7 +5,7 @@ TeamFace, an android app, applied the face recognition deep learning algorithm t
 
 ## Usage
 * Administrator system & Android APK installation package: click [here](http://39.103.167.15:2022).
-* Use the organization code 000 to register as a user of the Test Group.
+* Use the organization code **000** to register as a user of the **Test Group**.
 * Click ‘设置’ and follow the instructions to set up the user images.
 * Click ‘人脸识别’ to recognize your face and authenticate your identity.
 
@@ -21,3 +21,8 @@ TeamFace, an android app, applied the face recognition deep learning algorithm t
 <img src="demo/login.jpg" alt="login" width="250"/> <img src="demo/signup.jpg" alt="signup" width="250"/> <img src="demo/home.jpg" alt="home" width="250"/><br>
 <img src="demo/setting_success.jpg" alt="setting_success" width="250"/> <img src="demo/rec_success.jpg" alt="rec_success" width="250"/> <img src="demo/rec_failed.jpg" alt="rec_failed" width="250"/>
 </p>
+
+## Reference
+Face-Net: https://github.com/bubbliiiing/facenet-tf2 
+Siamese-Net: https://github.com/nicknochnack/FaceRecognition
+Deepface: https://github.com/serengil/deepface 
