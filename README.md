@@ -13,7 +13,14 @@ Administrator system & Android APK installation package: click [here](http://39.
 
 ## Demo
 <figure>
-  <img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/login.jpg" width="180" alt="Trulli">
+  <img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/login.jpg" width="180">
   <figcaption align = "center"><b>login</b></figcaption>
 </figure>
-<img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/signup.jpg" width="180"/> <img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/home.jpg" width="180"/>
+<figure>
+  <img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/signup.jpg" width="180"/>
+  <figcaption align = "center"><b>registration</b></figcaption>
+</figure>
+<figure>
+  <img src="https://github.com/PeimingCHEN/Team-Face/raw/master/demo/home.jpg" width="180"/>
+  <figcaption align = "center"><b>home</b></figcaption>
+</figure>
