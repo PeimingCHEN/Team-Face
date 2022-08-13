@@ -1,7 +1,7 @@
 # Team Face
 
 ## Introduction
-TeamFace, an android app, applied the face recognition deep learning algorithm to recognize the entered face and authenticate the user’s identity of the organization. Our app can be widely used in various personnel management application scenarios.
+TeamFace, an android app, applied the face recognition deep learning algorithm to recognize the entered face and authenticate the user’s identity of the organization. Our app can be widely used in various personnel management application scenarios.<br>
 Administrator system & Android APK installation package: click [here](http://39.103.167.15:2022)
 
 ## Functions
@@ -12,4 +12,5 @@ Administrator system & Android APK installation package: click [here](http://39.
 * The administrator can manage user data in the administrator system, such as modifying user information, adding organizations, setting registration codes, etc.
 
 ## Demo
-<img src="demo/login.jpg" alt="login" width="200"/> <img src="demo/signup.jpg" alt="signup" width="200"/> <img src="demo/home.jpg" alt="home" width="200"/> <img src="demo/setting.jpg" alt="setting" width="200"/>
+<img src="demo/login.jpg" alt="login" width="200"/> <img src="demo/signup.jpg" alt="signup" width="200"/> <img src="demo/home.jpg" alt="home" width="200"/>
+<img src="demo/setting_success.jpg" alt="setting_success" width="200"/> <img src="demo/rec_success.jpg" alt="rec_success" width="200"/> <img src="demo/rec_failed.jpg" alt="rec_failed" width="200"/>
